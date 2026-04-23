@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Signal OOS Dashboard</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap');
+:root{--bg:#0a0e17;--sf:#111827;--sf2:#1e293b;--bd:#2d3748;--tx:#e2e8f0;--tx2:#94a3b8;
+--grn:#22c55e;--red:#ef4444;--ylw:#eab308;--blu:#3b82f6;--prp:#8b5cf6;--cyn:#06b6d4;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--tx);font-family:'Noto Sans KR',sans-serif;padding:0;}
+.mono{font-family:'JetBrains Mono',monospace;}
+.wrap{max-width:1400px;margin:0 auto;padding:24px;}
+.header{margin-bottom:24px;display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:12px;}
+.header h1{font-size:26px;font-weight:700;}
+.header .meta{color:var(--tx2);font-size:12px;}
+.tabs{display:flex;gap:0;margin-bottom:28px;border-bottom:2px solid var(--bd);}
+.tab{padding:12px 32px;font-size:15px;font-weight:600;cursor:pointer;color:var(--tx2);border-bottom:3px solid transparent;transition:all .2s;}
+.tab:hover{color:var(--tx);}
+.tab.active{color:var(--blu);border-bottom-color:var(--blu);}
+.tab .flag{margin-right:6px;}
+.stats{display:flex;gap:14px;margin-bottom:28px;flex-wrap:wrap;}
+.sc{background:var(--sf);border:1px solid var(--bd);border-radius:12px;padding:14px 22px;min-width:110px;}
+.sc .lb{font-size:10px;color:var(--tx2);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;}
+.sc .vl{font-size:22px;font-weight:700;font-family:'JetBrains Mono',monospace;}
+.section{margin-bottom:36px;}
+.sh{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+.sh h2{font-size:16px;font-weight:600;}
+.badge{font-size:10px;padding:3px 9px;border-radius:20px;font-weight:600;}
+.bo{background:rgba(34,197,94,.15);color:var(--grn);}.br{background:rgba(239,68,68,.15);color:var(--red);}
+.bf{background:rgba(139,92,246,.15);color:var(--prp);}
+table{width:100%;border-collapse:collapse;}
+thead th{text-align:left;padding:9px 11px;font-size:10px;color:var(--tx2);text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--bd);}
+tbody tr.rw{cursor:pointer;transition:background .15s;border-bottom:1px solid rgba(45,55,72,.4);}
+tbody tr.rw:hover{background:var(--sf2);}
+tbody td{padding:9px 11px;font-size:12px;}
+.n{font-family:'JetBrains Mono',monospace;text-align:right;}
+.ps{color:var(--grn);}.ng{color:var(--red);}.nt{color:var(--tx2);}
+.st{font-size:10px;font-weight:600;padding:2px 7px;border-radius:5px;display:inline-block;}
+.st-ALIVE{background:rgba(34,197,94,.15);color:var(--grn);}.st-WEAK{background:rgba(234,179,8,.15);color:var(--ylw);}
+.st-NEUT{background:rgba(148,163,184,.15);color:var(--tx2);}.st-FLIP{background:rgba(239,68,68,.15);color:var(--red);}
+.st-NO_DATA{background:rgba(148,163,184,.1);color:#64748b;}
+.st-ACTIVE{background:rgba(139,92,246,.15);color:var(--prp);}.st-MILD{background:rgba(6,182,212,.15);color:var(--cyn);}
+.st-QUIET{background:rgba(148,163,184,.15);color:var(--tx2);}
+.dp{display:none;background:var(--sf);border:1px solid var(--bd);border-radius:10px;padding:18px;margin:6px 0 14px;}
+.dp.open{display:block;}
+.dg{display:grid;grid-template-columns:3fr 2fr;gap:18px;}
+@media(max-width:900px){.dg{grid-template-columns:1fr;}}
+.dt{width:100%;}.dt th{font-size:9px;color:var(--tx2);padding:5px 7px;text-align:left;border-bottom:1px solid var(--bd);}
+.dt td{font-size:11px;padding:5px 7px;font-family:'JetBrains Mono',monospace;}
+.dt .sep{border-left:2px solid var(--bd);}
+.rc{font-size:11px;color:var(--tx2);line-height:1.7;}.rc .dd{color:var(--tx);font-weight:500;}
+.legend{display:flex;gap:14px;font-size:10px;color:var(--tx2);margin-top:6px;}
+.legend span{display:flex;align-items:center;gap:4px;}
+.legend .dot{width:10px;height:3px;border-radius:1px;}
+.loading{text-align:center;padding:60px;color:var(--tx2);font-size:14px;}
+.error{text-align:center;padding:60px;color:var(--red);font-size:14px;}
+.mkt-panel{display:none;}.mkt-panel.active{display:block;}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="header">
+  <h1>Signal OOS Dashboard</h1>
+  <div class="meta" id="gen-info"></div>
+</div>
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('KR')"><span class="flag">🇰🇷</span> Korea</div>
+  <div class="tab" onclick="switchTab('US')"><span class="flag">🇺🇸</span> United States</div>
+</div>
+<div id="panel-KR" class="mkt-panel active"><div class="loading">Loading KR data...</div></div>
+<div id="panel-US" class="mkt-panel"><div class="loading">Loading US data...</div></div>
+</div>
+
+<script>
+// ============================================================
+// Data loading
+// ============================================================
+const DATA = {};
+const BASE = window.location.href.includes('github.io')
+  ? '.' : '.';
+
+async function loadData(market) {
+  if (DATA[market]) return DATA[market];
+  try {
+    const resp = await fetch(`${BASE}/data/${market.toLowerCase()}.json?t=${Date.now()}`);
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    DATA[market] = await resp.json();
+    return DATA[market];
+  } catch (e) {
+    console.error(`Failed to load ${market}:`, e);
+    return null;
+  }
+}
+
+// ============================================================
+// Tab switching
+// ============================================================
+function switchTab(market) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.mkt-panel').forEach(p => p.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+  document.getElementById(`panel-${market}`).classList.add('active');
+  renderMarket(market);
+}
+
+// ============================================================
+// Render
+// ============================================================
+async function renderMarket(market) {
+  const panel = document.getElementById(`panel-${market}`);
+  if (panel.dataset.rendered) return;
+
+  const d = await loadData(market);
+  if (!d) { panel.innerHTML = '<div class="error">데이터 로드 실패. JSON 파일을 확인하세요.</div>'; return; }
+
+  document.getElementById('gen-info').textContent =
+    `OOS: ${d.oos_start} ~ now | HP: ${d.main_hp}D | Updated: ${d.generated_at}`;
+
+  let html = '';
+
+  // Stats
+  const all = [...d.opportunity, ...d.risk, ...d.flow];
+  const al = all.filter(s=>s.status==="ALIVE").length;
+  const wk = all.filter(s=>s.status==="WEAK").length;
+  const av = all.filter(s=>s.status==="ACTIVE").length;
+  const nd = all.filter(s=>s.status==="NO_DATA").length;
+  html += `<div class="stats">
+    <div class="sc"><div class="lb">Total</div><div class="vl">${all.length}</div></div>
+    <div class="sc"><div class="lb" style="color:var(--grn)">Alive</div><div class="vl" style="color:var(--grn)">${al}</div></div>
+    <div class="sc"><div class="lb" style="color:var(--ylw)">Weak</div><div class="vl" style="color:var(--ylw)">${wk}</div></div>
+    <div class="sc"><div class="lb" style="color:var(--prp)">Active</div><div class="vl" style="color:var(--prp)">${av}</div></div>
+    <div class="sc"><div class="lb">No Data</div><div class="vl" style="color:var(--tx2)">${nd}</div></div>
+  </div>`;
+
+  // Sections
+  html += buildSection('기회포착 Opportunity', 'bo', 'AR > 0 = good', d.opportunity, 'opportunity', market);
+  html += buildSection('리스크감지 Risk', 'br', 'AR < 0 = good', d.risk, 'risk', market);
+  html += buildFlowSection('흐름체크 Flow Check', d.flow, market);
+
+  panel.innerHTML = html;
+  panel.dataset.rendered = '1';
+
+  // Attach click handlers
+  panel.querySelectorAll('tr.rw').forEach(row => {
+    row.addEventListener('click', () => {
+      const dp = row.nextElementSibling?.querySelector('.dp');
+      if (dp) dp.classList.toggle('open');
+    });
+  });
+}
+
+// ============================================================
+// Helpers
+// ============================================================
+function fp(v,s){if(v==null||isNaN(v))return"-";return(s&&v>0?"+":"")+v.toFixed(2)+"%";}
+function fP(v){return v==null||isNaN(v)?"-":v.toFixed(4);}
+function ac(v,t){if(v==null)return"nt";if(t==="risk")return v<0?"ps":v>0?"ng":"nt";return v>0?"ps":v<0?"ng":"nt";}
+
+function buildSection(title, badgeCls, badgeText, sigs, sType, mkt) {
+  sigs.sort((a,b)=>(a.p||1)-(b.p||1));
+  let h = `<div class="section"><div class="sh"><h2>${title}</h2><span class="badge ${badgeCls}">${badgeText}</span></div>`;
+  h += `<table><thead><tr><th>Code</th><th>Signal</th><th class="n">N</th><th class="n">Raw Ret</th><th class="n">Raw Hit</th><th class="n">AR^gross</th><th class="n">t(FM)</th><th class="n">AHR</th><th class="n">p-value</th><th>Status</th></tr></thead><tbody>`;
+  sigs.forEach((s,i) => {
+    const id = `dp-${mkt}-${sType}-${i}`;
+    if (s.status==="NO_DATA") {
+      h += `<tr class="rw"><td class="mono">${s.code}</td><td>${s.name}</td><td class="n nt">-</td><td class="n nt">-</td><td class="n nt">-</td><td class="n nt">-</td><td class="n nt">-</td><td class="n nt">-</td><td class="n nt">-</td><td><span class="st st-NO_DATA">NO DATA</span></td></tr>`;
+      h += `<tr><td colspan="10"><div class="dp" id="${id}"></div></td></tr>`;
+    } else {
+      const c=ac(s.ar,sType), rc=ac(s.raw_ret,sType);
+      h += `<tr class="rw"><td class="mono">${s.code}</td><td>${s.name}</td><td class="n">${s.n||"-"}</td><td class="n ${rc}">${fp(s.raw_ret,true)}</td><td class="n">${s.raw_hit!=null?s.raw_hit.toFixed(1)+"%":"-"}</td><td class="n ${c}">${fp(s.ar,true)}</td><td class="n ${c}">${s.t!=null?s.t.toFixed(2):"-"}</td><td class="n">${s.ahr!=null?s.ahr.toFixed(1)+"%":"-"}</td><td class="n">${fP(s.p)}</td><td><span class="st st-${s.status}">${s.status}</span></td></tr>`;
+      h += `<tr><td colspan="10"><div class="dp" id="${id}">${buildDirDetail(s, sType)}</div></td></tr>`;
+    }
+  });
+  h += `</tbody></table></div>`;
+  return h;
+}
+
+function buildFlowSection(title, sigs, mkt) {
+  sigs.sort((a,b)=>(b.abs_ar||0)-(a.abs_ar||0));
+  let h = `<div class="section"><div class="sh"><h2>${title}</h2><span class="badge bf">|움직임| 크기</span></div>`;
+  h += `<table><thead><tr><th>Code</th><th>Signal</th><th class="n">N</th><th class="n">|Raw| avg</th><th class="n">|AR| avg</th><th class="n">t-stat</th><th class="n">Up %</th><th class="n">p-value</th><th>Status</th></tr></thead><tbody>`;
+  sigs.forEach((s,i) => {
+    const id = `dp-${mkt}-flow-${i}`;
+    if (s.status==="NO_DATA") {
+      h += `<tr class="rw"><td class="mono">${s.code}</td><td>${s.name}</td><td class="n nt">-</td><td class="n nt">-</td><td class="n nt">-</td><td class="n nt">-</td><td class="n nt">-</td><td class="n nt">-</td><td><span class="st st-NO_DATA">NO DATA</span></td></tr>`;
+      h += `<tr><td colspan="9"><div class="dp" id="${id}"></div></td></tr>`;
+    } else {
+      h += `<tr class="rw"><td class="mono">${s.code}</td><td>${s.name}</td><td class="n">${s.n||"-"}</td><td class="n">${fp(s.raw_abs,false)}</td><td class="n" style="color:var(--prp)">${fp(s.abs_ar,false)}</td><td class="n">${s.t!=null?s.t.toFixed(2):"-"}</td><td class="n">${s.up_pct!=null?s.up_pct.toFixed(1)+"%":"-"}</td><td class="n">${fP(s.p)}</td><td><span class="st st-${s.status}">${s.status}</span></td></tr>`;
+      h += `<tr><td colspan="9"><div class="dp" id="${id}">${buildFlowDetail(s)}</div></td></tr>`;
+    }
+  });
+  h += `</tbody></table></div>`;
+  return h;
+}
+
+function svgCAR(raw, ar, sType) {
+  if (!ar||ar.length<2) return '<div style="color:var(--tx2);font-size:11px">No data</div>';
+  const W=400,H=190,P=42;
+  const allV=[...raw.map(c=>c.v),...ar.map(c=>c.v)];
+  const yMn=Math.min(0,...allV)-1, yMx=Math.max(0,...allV)+1;
+  const allD=[...new Set([...raw.map(c=>c.day),...ar.map(c=>c.day)])].sort((a,b)=>a-b);
+  const dMn=allD[0], dMx=allD[allD.length-1];
+  const xS=d=>P+(d-dMn)/(dMx-dMn||1)*(W-P*2);
+  const yS=v=>P+(yMx-v)/(yMx-yMn||1)*(H-P*2);
+  const col=sType==="risk"?"#ef4444":"#3b82f6";
+  const z=yS(0);
+  let s=`<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" style="width:100%">`;
+  s+=`<line x1="${P}" y1="${z}" x2="${W-P}" y2="${z}" stroke="#4a5568" stroke-dasharray="4"/>`;
+  if(raw.length>1){const rp=raw.map(c=>xS(c.day)+","+yS(c.v)).join(" ");s+=`<polyline points="${rp}" fill="none" stroke="#64748b" stroke-width="1.5" stroke-dasharray="6,3" opacity="0.7"/>`;raw.forEach(c=>{s+=`<circle cx="${xS(c.day)}" cy="${yS(c.v)}" r="3" fill="#64748b" opacity="0.7"/>`;});}
+  const ap=ar.map(c=>xS(c.day)+","+yS(c.v)).join(" ");
+  s+=`<polygon points="${xS(ar[0].day)},${z} ${ap} ${xS(ar[ar.length-1].day)},${z}" fill="${col}" opacity="0.08"/>`;
+  s+=`<polyline points="${ap}" fill="none" stroke="${col}" stroke-width="2.5" stroke-linejoin="round"/>`;
+  ar.forEach(c=>{const x=xS(c.day),y=yS(c.v);s+=`<circle cx="${x}" cy="${y}" r="4" fill="${col}"/>`;if(c.day>0)s+=`<text x="${x}" y="${y-11}" fill="#94a3b8" font-size="9" text-anchor="middle" font-family="monospace">${c.v>0?"+":""}${c.v.toFixed(1)}%</text>`;});
+  allD.forEach(d=>{s+=`<text x="${xS(d)}" y="${H-4}" fill="#64748b" font-size="9" text-anchor="middle" font-family="monospace">${d}D</text>`;});
+  s+=`</svg>`;return s;
+}
+
+function buildDirDetail(s, sType) {
+  if (!s.detail) return '';
+  const d=s.detail;
+  let pt=`<table class="dt"><thead><tr><th>Hold</th><th class="n">N</th><th class="n" style="color:var(--tx2)">Raw Ret</th><th class="n" style="color:var(--tx2)">Raw Hit</th><th class="n sep">AR^gross</th><th class="n">t(FM)</th><th class="n">AHR</th><th class="n">p-value</th></tr></thead><tbody>`;
+  d.perf.forEach(r=>{const c=ac(r.ar,sType),rc=ac(r.raw_ret,sType);const sg=r.p<0.01?"***":r.p<0.05?"**":r.p<0.1?"*":"";pt+=`<tr><td>${r.hp}D</td><td class="n">${r.n}</td><td class="n ${rc}">${fp(r.raw_ret,true)}</td><td class="n">${r.raw_hit.toFixed(1)}%</td><td class="n sep ${c}">${fp(r.ar,true)}</td><td class="n ${c}">${r.t.toFixed(2)}</td><td class="n">${r.ahr.toFixed(1)}%</td><td class="n">${r.p.toFixed(4)}${sg}</td></tr>`;});
+  pt+="</tbody></table>";
+  const chart = svgCAR(d.car_raw||[], d.car_ar||[], sType);
+  let rc='<div class="rc">';
+  (d.recent||[]).forEach(r=>{rc+=`<div><span class="dd">${r.date}</span> (${r.n}): ${r.tickers.join(", ")}</div>`;});
+  rc+="</div>";
+  const leg=`<div class="legend"><span><div class="dot" style="background:${sType==="risk"?"#ef4444":"#3b82f6"}"></div>AR^gross</span><span><div class="dot" style="background:#64748b"></div>Raw Return</span></div>`;
+  return `<div class="dg"><div><h4 style="margin-bottom:10px;font-size:12px;color:var(--tx2)">Performance by Holding Period</h4>${pt}</div><div><h4 style="margin-bottom:6px;font-size:12px;color:var(--tx2)">CAR Curve</h4>${chart}${leg}<h4 style="margin:14px 0 6px;font-size:12px;color:var(--tx2)">Recent Events</h4>${rc}</div></div>`;
+}
+
+function buildFlowDetail(s) {
+  if (!s.detail) return '';
+  const d=s.detail;
+  let pt=`<table class="dt"><thead><tr><th>Hold</th><th class="n">N</th><th class="n" style="color:var(--tx2)">|Raw|</th><th class="n sep" style="color:var(--prp)">|AR|</th><th class="n">t-stat</th><th class="n">Up %</th><th class="n">p-value</th></tr></thead><tbody>`;
+  d.perf.forEach(r=>{pt+=`<tr><td>${r.hp}D</td><td class="n">${r.n}</td><td class="n">${r.raw_abs.toFixed(2)}%</td><td class="n sep" style="color:var(--prp)">${r.abs_ar.toFixed(2)}%</td><td class="n">${r.t.toFixed(2)}</td><td class="n">${r.up_pct.toFixed(1)}%</td><td class="n">${r.p.toFixed(4)}</td></tr>`;});
+  pt+="</tbody></table>";
+  let rc='<div class="rc">';
+  (d.recent||[]).forEach(r=>{rc+=`<div><span class="dd">${r.date}</span> (${r.n}): ${r.tickers.join(", ")}</div>`;});
+  rc+="</div>";
+  return `<div class="dg"><div><h4 style="margin-bottom:10px;font-size:12px;color:var(--tx2)">Performance by Holding Period</h4>${pt}</div><div><h4 style="margin:0 0 6px;font-size:12px;color:var(--tx2)">Recent Events</h4>${rc}</div></div>`;
+}
+
+// ============================================================
+// Init
+// ============================================================
+renderMarket('KR');
+</script>
+</body>
+</html>
