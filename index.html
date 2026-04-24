@@ -161,7 +161,7 @@ function updateHeader(d, market) {
 
   const updatedKR = d.updated_at_kr || d.generated_at || '';
   document.getElementById('gen-info').textContent =
-    `${mktLabel} | Main HP: ${d.main_hp}D | Updated: ${updatedKR} (KST)`;
+    `${mktLabel} | 아래 성과는 시그널 발생 후 ${d.main_hp}거래일 보유 기준 | Updated: ${updatedKR}`;
 }
 
 // ============================================================
@@ -174,7 +174,7 @@ function buildBmChart(d, market) {
   }
 
   const bmName = market === 'KR' ? 'KOSPI' : 'S&P 500';
-  const W = 800, H = 160, P = 50, PR = 20;
+  const W = 800, H = 200, P = 50, PR = 70;
   const dates = bm.dates;
   const vals = bm.values;
   const rets = bm.cum_returns; // cumulative return from OOS start (%)
@@ -182,7 +182,7 @@ function buildBmChart(d, market) {
   const yMn = Math.min(0, ...rets) - 1;
   const yMx = Math.max(0, ...rets) + 1;
   const xS = i => P + (i / (dates.length - 1)) * (W - P - PR);
-  const yS = v => 10 + (yMx - v) / (yMx - yMn || 1) * (H - 30);
+  const yS = v => 15 + (yMx - v) / (yMx - yMn || 1) * (H - 45);
   const z = yS(0);
 
   const lastRet = rets[rets.length - 1];
@@ -199,20 +199,36 @@ function buildBmChart(d, market) {
   // End point + label
   const lastX = xS(rets.length - 1), lastY = yS(lastRet);
   svg += `<circle cx="${lastX}" cy="${lastY}" r="4" fill="${color}"/>`;
-  svg += `<text x="${lastX+8}" y="${lastY+4}" fill="${color}" font-size="12" font-weight="bold" font-family="JetBrains Mono,monospace">${lastRet >= 0 ? '+' : ''}${lastRet.toFixed(1)}%</text>`;
+  svg += `<text x="${lastX+10}" y="${lastY+5}" fill="${color}" font-size="13" font-weight="bold" font-family="JetBrains Mono,monospace">${lastRet >= 0 ? '+' : ''}${lastRet.toFixed(1)}%</text>`;
+  // Min point annotation
+  const minRet = Math.min(...rets);
+  const minIdx = rets.indexOf(minRet);
+  if (minRet < -1 && minIdx !== rets.length - 1) {
+    svg += `<circle cx="${xS(minIdx)}" cy="${yS(minRet)}" r="3" fill="#ef4444" opacity="0.6"/>`;
+    svg += `<text x="${xS(minIdx)}" y="${yS(minRet)+14}" fill="#ef4444" font-size="10" text-anchor="middle" font-family="monospace">${minRet.toFixed(1)}%</text>`;
+  }
+  // Max point annotation
+  const maxRet = Math.max(...rets);
+  const maxIdx = rets.indexOf(maxRet);
+  if (maxRet > 1 && maxIdx !== rets.length - 1) {
+    svg += `<circle cx="${xS(maxIdx)}" cy="${yS(maxRet)}" r="3" fill="#22c55e" opacity="0.6"/>`;
+    svg += `<text x="${xS(maxIdx)}" y="${yS(maxRet)-8}" fill="#22c55e" font-size="10" text-anchor="middle" font-family="monospace">+${maxRet.toFixed(1)}%</text>`;
+  }
   // Start label
-  svg += `<text x="${xS(0)}" y="${H-2}" fill="#64748b" font-size="9" text-anchor="middle" font-family="monospace">${dates[0]}</text>`;
+  svg += `<text x="${xS(0)}" y="${H-4}" fill="#64748b" font-size="10" text-anchor="start" font-family="monospace">${dates[0]}</text>`;
   // End label
-  svg += `<text x="${lastX}" y="${H-2}" fill="#64748b" font-size="9" text-anchor="middle" font-family="monospace">${dates[dates.length-1]}</text>`;
+  svg += `<text x="${lastX}" y="${H-4}" fill="#64748b" font-size="10" text-anchor="end" font-family="monospace">${dates[dates.length-1]}</text>`;
   // Mid label
   if (dates.length > 10) {
     const midI = Math.floor(dates.length / 2);
-    svg += `<text x="${xS(midI)}" y="${H-2}" fill="#64748b" font-size="9" text-anchor="middle" font-family="monospace">${dates[midI]}</text>`;
+    svg += `<text x="${xS(midI)}" y="${H-4}" fill="#64748b" font-size="10" text-anchor="middle" font-family="monospace">${dates[midI]}</text>`;
   }
   // Y axis labels
-  svg += `<text x="${P-4}" y="${z+4}" fill="#64748b" font-size="9" text-anchor="end" font-family="monospace">0%</text>`;
-  if (yMx > 1) svg += `<text x="${P-4}" y="${yS(yMx-0.5)+4}" fill="#64748b" font-size="9" text-anchor="end" font-family="monospace">+${(yMx-0.5).toFixed(0)}%</text>`;
-  if (yMn < -1) svg += `<text x="${P-4}" y="${yS(yMn+0.5)+4}" fill="#64748b" font-size="9" text-anchor="end" font-family="monospace">${(yMn+0.5).toFixed(0)}%</text>`;
+  svg += `<text x="${P-4}" y="${z+4}" fill="#64748b" font-size="10" text-anchor="end" font-family="monospace">0%</text>`;
+  const yTop = Math.ceil(yMx);
+  const yBot = Math.floor(yMn);
+  if (yTop > 0) svg += `<text x="${P-4}" y="${yS(yTop)+4}" fill="#64748b" font-size="10" text-anchor="end" font-family="monospace">+${yTop}%</text>`;
+  if (yBot < 0) svg += `<text x="${P-4}" y="${yS(yBot)+4}" fill="#64748b" font-size="10" text-anchor="end" font-family="monospace">${yBot}%</text>`;
 
   svg += '</svg>';
 
