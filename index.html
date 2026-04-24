@@ -12,18 +12,24 @@
 body{background:var(--bg);color:var(--tx);font-family:'Noto Sans KR',sans-serif;padding:0;}
 .mono{font-family:'JetBrains Mono',monospace;}
 .wrap{max-width:1400px;margin:0 auto;padding:24px;}
-.header{margin-bottom:24px;display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:12px;}
+.header{margin-bottom:8px;}
 .header h1{font-size:26px;font-weight:700;}
-.header .meta{color:var(--tx2);font-size:12px;}
-.tabs{display:flex;gap:0;margin-bottom:28px;border-bottom:2px solid var(--bd);}
+.header h1 .oos-range{font-size:15px;font-weight:400;color:var(--tx2);margin-left:12px;}
+.header .meta{color:var(--tx2);font-size:12px;margin-top:4px;}
+.tabs{display:flex;gap:0;margin:20px 0;border-bottom:2px solid var(--bd);}
 .tab{padding:12px 32px;font-size:15px;font-weight:600;cursor:pointer;color:var(--tx2);border-bottom:3px solid transparent;transition:all .2s;}
 .tab:hover{color:var(--tx);}
 .tab.active{color:var(--blu);border-bottom-color:var(--blu);}
 .tab .flag{margin-right:6px;}
-.stats{display:flex;gap:14px;margin-bottom:28px;flex-wrap:wrap;}
+.stats{display:flex;gap:14px;margin-bottom:20px;flex-wrap:wrap;}
 .sc{background:var(--sf);border:1px solid var(--bd);border-radius:12px;padding:14px 22px;min-width:110px;}
 .sc .lb{font-size:10px;color:var(--tx2);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;}
 .sc .vl{font-size:22px;font-weight:700;font-family:'JetBrains Mono',monospace;}
+.bm-chart-wrap{background:var(--sf);border:1px solid var(--bd);border-radius:12px;padding:18px 20px;margin-bottom:28px;}
+.bm-chart-wrap h3{font-size:13px;color:var(--tx2);margin-bottom:10px;font-weight:500;}
+.bm-legend{display:flex;gap:16px;font-size:11px;color:var(--tx2);margin-top:8px;}
+.bm-legend span{display:flex;align-items:center;gap:4px;}
+.bm-legend .dot{width:12px;height:3px;border-radius:1px;}
 .section{margin-bottom:36px;}
 .sh{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
 .sh h2{font-size:16px;font-weight:600;}
@@ -62,7 +68,7 @@ tbody td{padding:9px 11px;font-size:12px;}
 <body>
 <div class="wrap">
 <div class="header">
-  <h1>Signal OOS Dashboard</h1>
+  <h1 id="main-title">Signal OOS Dashboard</h1>
   <div class="meta" id="gen-info"></div>
 </div>
 <div class="tabs">
@@ -74,12 +80,8 @@ tbody td{padding:9px 11px;font-size:12px;}
 </div>
 
 <script>
-// ============================================================
-// Data loading
-// ============================================================
 const DATA = {};
-const BASE = window.location.href.includes('github.io')
-  ? '.' : '.';
+const BASE = '.';
 
 async function loadData(market) {
   if (DATA[market]) return DATA[market];
@@ -94,9 +96,6 @@ async function loadData(market) {
   }
 }
 
-// ============================================================
-// Tab switching
-// ============================================================
 function switchTab(market) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.mkt-panel').forEach(p => p.classList.remove('active'));
@@ -105,18 +104,19 @@ function switchTab(market) {
   renderMarket(market);
 }
 
-// ============================================================
-// Render
-// ============================================================
 async function renderMarket(market) {
   const panel = document.getElementById(`panel-${market}`);
-  if (panel.dataset.rendered) return;
+  if (panel.dataset.rendered) {
+    // Update header even if already rendered
+    const d = DATA[market];
+    if (d) updateHeader(d, market);
+    return;
+  }
 
   const d = await loadData(market);
-  if (!d) { panel.innerHTML = '<div class="error">데이터 로드 실패. JSON 파일을 확인하세요.</div>'; return; }
+  if (!d) { panel.innerHTML = '<div class="error">데이터 로드 실패</div>'; return; }
 
-  document.getElementById('gen-info').textContent =
-    `OOS: ${d.oos_start} ~ now | HP: ${d.main_hp}D | Updated: ${d.generated_at}`;
+  updateHeader(d, market);
 
   let html = '';
 
@@ -134,6 +134,9 @@ async function renderMarket(market) {
     <div class="sc"><div class="lb">No Data</div><div class="vl" style="color:var(--tx2)">${nd}</div></div>
   </div>`;
 
+  // BM Chart
+  html += buildBmChart(d, market);
+
   // Sections
   html += buildSection('기회포착 Opportunity', 'bo', 'AR > 0 = good', d.opportunity, 'opportunity', market);
   html += buildSection('리스크감지 Risk', 'br', 'AR < 0 = good', d.risk, 'risk', market);
@@ -142,13 +145,81 @@ async function renderMarket(market) {
   panel.innerHTML = html;
   panel.dataset.rendered = '1';
 
-  // Attach click handlers
   panel.querySelectorAll('tr.rw').forEach(row => {
     row.addEventListener('click', () => {
       const dp = row.nextElementSibling?.querySelector('.dp');
       if (dp) dp.classList.toggle('open');
     });
   });
+}
+
+function updateHeader(d, market) {
+  const flag = market === 'KR' ? '🇰🇷' : '🇺🇸';
+  const mktLabel = market === 'KR' ? 'Korea' : 'US';
+  document.getElementById('main-title').innerHTML =
+    `${flag} Signal OOS Dashboard <span class="oos-range">${d.oos_start} ~ now</span>`;
+
+  const updatedKR = d.updated_at_kr || d.generated_at || '';
+  document.getElementById('gen-info').textContent =
+    `${mktLabel} | Main HP: ${d.main_hp}D | Updated: ${updatedKR} (KST)`;
+}
+
+// ============================================================
+// BM Chart (SVG)
+// ============================================================
+function buildBmChart(d, market) {
+  const bm = d.bm_chart;
+  if (!bm || !bm.dates || bm.dates.length < 2) {
+    return '<div class="bm-chart-wrap"><h3>Benchmark Index (OOS period)</h3><div style="color:var(--tx2);font-size:12px">No benchmark data</div></div>';
+  }
+
+  const bmName = market === 'KR' ? 'KOSPI' : 'S&P 500';
+  const W = 800, H = 160, P = 50, PR = 20;
+  const dates = bm.dates;
+  const vals = bm.values;
+  const rets = bm.cum_returns; // cumulative return from OOS start (%)
+
+  const yMn = Math.min(0, ...rets) - 1;
+  const yMx = Math.max(0, ...rets) + 1;
+  const xS = i => P + (i / (dates.length - 1)) * (W - P - PR);
+  const yS = v => 10 + (yMx - v) / (yMx - yMn || 1) * (H - 30);
+  const z = yS(0);
+
+  const lastRet = rets[rets.length - 1];
+  const color = lastRet >= 0 ? '#22c55e' : '#ef4444';
+
+  let svg = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" style="width:100%">`;
+  // Zero line
+  svg += `<line x1="${P}" y1="${z}" x2="${W-PR}" y2="${z}" stroke="#4a5568" stroke-dasharray="4"/>`;
+  // Area fill
+  const pts = rets.map((v, i) => `${xS(i)},${yS(v)}`).join(' ');
+  svg += `<polygon points="${xS(0)},${z} ${pts} ${xS(rets.length-1)},${z}" fill="${color}" opacity="0.08"/>`;
+  // Line
+  svg += `<polyline points="${pts}" fill="none" stroke="${color}" stroke-width="2" stroke-linejoin="round"/>`;
+  // End point + label
+  const lastX = xS(rets.length - 1), lastY = yS(lastRet);
+  svg += `<circle cx="${lastX}" cy="${lastY}" r="4" fill="${color}"/>`;
+  svg += `<text x="${lastX+8}" y="${lastY+4}" fill="${color}" font-size="12" font-weight="bold" font-family="JetBrains Mono,monospace">${lastRet >= 0 ? '+' : ''}${lastRet.toFixed(1)}%</text>`;
+  // Start label
+  svg += `<text x="${xS(0)}" y="${H-2}" fill="#64748b" font-size="9" text-anchor="middle" font-family="monospace">${dates[0]}</text>`;
+  // End label
+  svg += `<text x="${lastX}" y="${H-2}" fill="#64748b" font-size="9" text-anchor="middle" font-family="monospace">${dates[dates.length-1]}</text>`;
+  // Mid label
+  if (dates.length > 10) {
+    const midI = Math.floor(dates.length / 2);
+    svg += `<text x="${xS(midI)}" y="${H-2}" fill="#64748b" font-size="9" text-anchor="middle" font-family="monospace">${dates[midI]}</text>`;
+  }
+  // Y axis labels
+  svg += `<text x="${P-4}" y="${z+4}" fill="#64748b" font-size="9" text-anchor="end" font-family="monospace">0%</text>`;
+  if (yMx > 1) svg += `<text x="${P-4}" y="${yS(yMx-0.5)+4}" fill="#64748b" font-size="9" text-anchor="end" font-family="monospace">+${(yMx-0.5).toFixed(0)}%</text>`;
+  if (yMn < -1) svg += `<text x="${P-4}" y="${yS(yMn+0.5)+4}" fill="#64748b" font-size="9" text-anchor="end" font-family="monospace">${(yMn+0.5).toFixed(0)}%</text>`;
+
+  svg += '</svg>';
+
+  return `<div class="bm-chart-wrap">
+    <h3>${bmName} Cumulative Return (since ${d.oos_start})</h3>
+    ${svg}
+  </div>`;
 }
 
 // ============================================================
@@ -199,8 +270,8 @@ function svgCAR(raw, ar, sType) {
   if (!ar||ar.length<2) return '<div style="color:var(--tx2);font-size:11px">No data</div>';
   const W=400,H=190,P=42;
   const allV=[...raw.map(c=>c.v),...ar.map(c=>c.v)];
-  const yMn=Math.min(0,...allV)-1, yMx=Math.max(0,...allV)+1;
   const allD=[...new Set([...raw.map(c=>c.day),...ar.map(c=>c.day)])].sort((a,b)=>a-b);
+  const yMn=Math.min(0,...allV)-1, yMx=Math.max(0,...allV)+1;
   const dMn=allD[0], dMx=allD[allD.length-1];
   const xS=d=>P+(d-dMn)/(dMx-dMn||1)*(W-P*2);
   const yS=v=>P+(yMx-v)/(yMx-yMn||1)*(H-P*2);
@@ -243,9 +314,7 @@ function buildFlowDetail(s) {
   return `<div class="dg"><div><h4 style="margin-bottom:10px;font-size:12px;color:var(--tx2)">Performance by Holding Period</h4>${pt}</div><div><h4 style="margin:0 0 6px;font-size:12px;color:var(--tx2)">Recent Events</h4>${rc}</div></div>`;
 }
 
-// ============================================================
 // Init
-// ============================================================
 renderMarket('KR');
 </script>
 </body>
