@@ -1,7 +1,7 @@
 {
   "market": "KR",
   "oos_start": "2026-03-01",
-  "generated_at": "2026-05-02 22:00",
+  "generated_at": "2026-05-03 22:00",
   "main_hp": 10,
   "holding_periods": [
     1,
@@ -7048,7 +7048,7 @@
       }
     }
   ],
-  "updated_at_kr": "2026-05-03 07:00 KST",
+  "updated_at_kr": "2026-05-04 07:00 KST",
   "bm_chart": {
     "dates": [
       "2026-03-03",
