@@ -21,15 +21,18 @@ body{background:var(--bg);color:var(--tx);font-family:'Noto Sans KR',sans-serif;
 .tab:hover{color:var(--tx);}
 .tab.active{color:var(--blu);border-bottom-color:var(--blu);}
 .tab .flag{margin-right:6px;}
+/* Sub-tabs (Role 3 / Role 4) */
+.sub-tabs{display:flex;gap:0;margin:0 0 20px;border-bottom:1px solid var(--bd);}
+.sub-tab{padding:8px 20px;font-size:13px;font-weight:500;cursor:pointer;color:var(--tx2);border-bottom:2px solid transparent;transition:all .2s;}
+.sub-tab:hover{color:var(--tx);}
+.sub-tab.active{color:var(--cyn);border-bottom-color:var(--cyn);}
+.sub-panel{display:none;}.sub-panel.active{display:block;}
 .stats{display:flex;gap:14px;margin-bottom:20px;flex-wrap:wrap;}
 .sc{background:var(--sf);border:1px solid var(--bd);border-radius:12px;padding:14px 22px;min-width:110px;}
 .sc .lb{font-size:10px;color:var(--tx2);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;}
 .sc .vl{font-size:22px;font-weight:700;font-family:'JetBrains Mono',monospace;}
 .bm-chart-wrap{background:var(--sf);border:1px solid var(--bd);border-radius:12px;padding:18px 20px;margin-bottom:28px;}
 .bm-chart-wrap h3{font-size:13px;color:var(--tx2);margin-bottom:10px;font-weight:500;}
-.bm-legend{display:flex;gap:16px;font-size:11px;color:var(--tx2);margin-top:8px;}
-.bm-legend span{display:flex;align-items:center;gap:4px;}
-.bm-legend .dot{width:12px;height:3px;border-radius:1px;}
 .section{margin-bottom:36px;}
 .sh{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
 .sh h2{font-size:16px;font-weight:600;}
@@ -49,6 +52,10 @@ tbody td{padding:9px 11px;font-size:12px;}
 .st-NO_DATA{background:rgba(148,163,184,.1);color:#64748b;}
 .st-ACTIVE{background:rgba(139,92,246,.15);color:var(--prp);}.st-MILD{background:rgba(6,182,212,.15);color:var(--cyn);}
 .st-QUIET{background:rgba(148,163,184,.15);color:var(--tx2);}
+.st-HIGH_RISK{background:rgba(239,68,68,.15);color:var(--red);}
+.st-MODERATE{background:rgba(234,179,8,.15);color:var(--ylw);}
+.st-LOW_RISK{background:rgba(6,182,212,.15);color:var(--cyn);}
+.st-STABLE{background:rgba(34,197,94,.15);color:var(--grn);}
 .dp{display:none;background:var(--sf);border:1px solid var(--bd);border-radius:10px;padding:18px;margin:6px 0 14px;}
 .dp.open{display:block;}
 .dg{display:grid;grid-template-columns:3fr 2fr;gap:18px;}
@@ -77,6 +84,25 @@ tbody td{padding:9px 11px;font-size:12px;}
 .modal .status-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;}
 .modal p{font-size:12px;color:var(--tx2);line-height:1.7;margin:8px 0;}
 .modal .section-label{font-size:13px;font-weight:600;color:var(--tx);margin:16px 0 8px;}
+/* Role 4 UX Guide */
+.ux-controls{display:flex;gap:16px;align-items:center;margin-bottom:20px;flex-wrap:wrap;}
+.ux-select{background:var(--sf);color:var(--tx);border:1px solid var(--bd);border-radius:8px;padding:6px 12px;font-size:12px;font-family:'JetBrains Mono',monospace;cursor:pointer;}
+.ux-select:focus{outline:none;border-color:var(--cyn);}
+.ux-toggle{display:flex;gap:0;border:1px solid var(--bd);border-radius:8px;overflow:hidden;}
+.ux-toggle-btn{padding:6px 14px;font-size:11px;cursor:pointer;background:var(--sf);color:var(--tx2);border:none;transition:all .2s;}
+.ux-toggle-btn.active{background:var(--cyn);color:#fff;}
+.ux-card{background:var(--sf);border:1px solid var(--bd);border-radius:12px;padding:16px 20px;margin-bottom:16px;}
+.ux-card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
+.ux-card-header h3{font-size:14px;font-weight:600;}
+.ux-card-header .code{font-family:'JetBrains Mono',monospace;color:var(--cyn);font-size:13px;}
+.ux-metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:14px;}
+.ux-metric{background:var(--sf2);border-radius:8px;padding:10px 14px;}
+.ux-metric .label{font-size:9px;color:var(--tx2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px;}
+.ux-metric .value{font-size:16px;font-weight:700;font-family:'JetBrains Mono',monospace;}
+.ux-detail{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+@media(max-width:900px){.ux-detail{grid-template-columns:1fr;}}
+.ux-chart-wrap{background:var(--sf2);border-radius:8px;padding:14px;}
+.ux-chart-wrap h4{font-size:11px;color:var(--tx2);margin-bottom:8px;}
 </style>
 </head>
 <body>
@@ -98,7 +124,6 @@ tbody td{padding:9px 11px;font-size:12px;}
 <div class="modal">
 <button class="close-btn" onclick="document.getElementById('methModal').classList.remove('open')">&times;</button>
 <h3>📊 Status 판정 기준</h3>
-
 <div class="section-label">기회포착 (Opportunity) / 리스크감지 (Risk)</div>
 <p>시그널 발생 후 N거래일 보유 시 초과수익(AR^gross)의 통계적 유의성을 기준으로 판정합니다.</p>
 <table>
@@ -108,7 +133,6 @@ tbody td{padding:9px 11px;font-size:12px;}
 <tr><td><span class="status-dot" style="background:#94a3b8"></span>NEUT</td><td>p ≥ 0.10</td><td>유의하지 않음</td></tr>
 <tr><td><span class="status-dot" style="background:#ef4444"></span>FLIP</td><td>AR이 의도 반대 방향</td><td>시그널이 반대로 작동 중</td></tr>
 </table>
-
 <div class="section-label">흐름체크 (Flow Check)</div>
 <p>방향이 아닌 |AR^gross| 크기(움직임의 절대값)를 기준으로 판정합니다.</p>
 <table>
@@ -117,7 +141,6 @@ tbody td{padding:9px 11px;font-size:12px;}
 <tr><td><span class="status-dot" style="background:#06b6d4"></span>MILD</td><td>|AR| 평균 0.5~1.0%</td><td>약한 움직임</td></tr>
 <tr><td><span class="status-dot" style="background:#94a3b8"></span>QUIET</td><td>|AR| 평균 &lt; 0.5%</td><td>유의미한 움직임 없음</td></tr>
 </table>
-
 <div class="section-label">주요 지표 설명</div>
 <table>
 <tr><th>지표</th><th>설명</th></tr>
@@ -127,7 +150,14 @@ tbody td{padding:9px 11px;font-size:12px;}
 <tr><td>p-value</td><td>FM t-test 단측 p-value (방향 고려)</td></tr>
 <tr><td>Raw Ret</td><td>벤치마크 차감 전 원시 수익률</td></tr>
 </table>
-
+<div class="section-label">UX Guide (역할 4)</div>
+<table>
+<tr><th>지표</th><th>설명</th></tr>
+<tr><td>MAE</td><td>Maximum Adverse Excursion — 보유 중 최대 낙폭</td></tr>
+<tr><td>MFE</td><td>Maximum Favorable Excursion — 보유 중 최대 수익</td></tr>
+<tr><td>Pain Ratio</td><td>MAE &lt; -10% 발생 비율</td></tr>
+<tr><td>Avg Path</td><td>평균 수익률 경로 ± 1σ</td></tr>
+</table>
 <div class="section-label">기타</div>
 <p><strong>NO DATA</strong> — OOS 기간 동안 해당 시그널의 발동 이벤트가 0건</p>
 <p><strong>CAR Curve</strong> — 보유기간별 누적 초과수익. 파란선=AR^gross, 회색점선=Raw Return</p>
@@ -137,6 +167,7 @@ tbody td{padding:9px 11px;font-size:12px;}
 
 <script>
 const DATA = {};
+const UX_DATA = {};
 const BASE = '.';
 
 async function loadData(market) {
@@ -146,10 +177,17 @@ async function loadData(market) {
     if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
     DATA[market] = await resp.json();
     return DATA[market];
-  } catch (e) {
-    console.error(`Failed to load ${market}:`, e);
-    return null;
-  }
+  } catch (e) { console.error(`Failed to load ${market}:`, e); return null; }
+}
+
+async function loadUxData(market) {
+  if (UX_DATA[market]) return UX_DATA[market];
+  try {
+    const resp = await fetch(`${BASE}/data/${market.toLowerCase()}_ux.json?t=${Date.now()}`);
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    UX_DATA[market] = await resp.json();
+    return UX_DATA[market];
+  } catch (e) { console.error(`Failed to load UX ${market}:`, e); return null; }
 }
 
 function switchTab(market) {
@@ -160,10 +198,18 @@ function switchTab(market) {
   renderMarket(market);
 }
 
+function switchSubTab(market, tab) {
+  const panel = document.getElementById(`panel-${market}`);
+  panel.querySelectorAll('.sub-tab').forEach(t => t.classList.remove('active'));
+  panel.querySelectorAll('.sub-panel').forEach(p => p.classList.remove('active'));
+  panel.querySelector(`.sub-tab[data-tab="${tab}"]`).classList.add('active');
+  panel.querySelector(`#sub-${market}-${tab}`).classList.add('active');
+  if (tab === 'ux') renderUxPanel(market);
+}
+
 async function renderMarket(market) {
   const panel = document.getElementById(`panel-${market}`);
   if (panel.dataset.rendered) {
-    // Update header even if already rendered
     const d = DATA[market];
     if (d) updateHeader(d, market);
     return;
@@ -171,17 +217,19 @@ async function renderMarket(market) {
 
   const d = await loadData(market);
   if (!d) { panel.innerHTML = '<div class="error">데이터 로드 실패</div>'; return; }
-
   updateHeader(d, market);
 
-  let html = '';
+  // Sub-tabs wrapper
+  let html = `<div class="sub-tabs">
+    <div class="sub-tab active" data-tab="oos" onclick="switchSubTab('${market}','oos')">📊 OOS 성과</div>
+    <div class="sub-tab" data-tab="ux" onclick="switchSubTab('${market}','ux')">🎯 UX Guide</div>
+  </div>`;
 
-  // Stats
+  // ── OOS Sub-panel (Role 3) ──
+  html += `<div class="sub-panel active" id="sub-${market}-oos">`;
   const all = [...d.opportunity, ...d.risk, ...d.flow];
-  const al = all.filter(s=>s.status==="ALIVE").length;
-  const wk = all.filter(s=>s.status==="WEAK").length;
-  const av = all.filter(s=>s.status==="ACTIVE").length;
-  const nd = all.filter(s=>s.status==="NO_DATA").length;
+  const al=all.filter(s=>s.status==="ALIVE").length, wk=all.filter(s=>s.status==="WEAK").length;
+  const av=all.filter(s=>s.status==="ACTIVE").length, nd=all.filter(s=>s.status==="NO_DATA").length;
   html += `<div class="stats">
     <div class="sc"><div class="lb">Total</div><div class="vl">${all.length}</div></div>
     <div class="sc"><div class="lb" style="color:var(--grn)">Alive</div><div class="vl" style="color:var(--grn)">${al}</div></div>
@@ -190,19 +238,20 @@ async function renderMarket(market) {
     <div class="sc"><div class="lb">No Data</div><div class="vl" style="color:var(--tx2)">${nd}</div></div>
     <div class="info-btn" onclick="document.getElementById('methModal').classList.add('open')" title="판정 기준 보기">ℹ️</div>
   </div>`;
-
-  // BM Chart
   html += buildBmChart(d, market);
+  html += buildSection('기회포착 Opportunity','bo','AR > 0 = good',d.opportunity,'opportunity',market);
+  html += buildSection('리스크감지 Risk','br','AR < 0 = good',d.risk,'risk',market);
+  html += buildFlowSection('흐름체크 Flow Check',d.flow,market);
+  html += `</div>`;
 
-  // Sections
-  html += buildSection('기회포착 Opportunity', 'bo', 'AR > 0 = good', d.opportunity, 'opportunity', market);
-  html += buildSection('리스크감지 Risk', 'br', 'AR < 0 = good', d.risk, 'risk', market);
-  html += buildFlowSection('흐름체크 Flow Check', d.flow, market);
+  // ── UX Sub-panel (Role 4) ──
+  html += `<div class="sub-panel" id="sub-${market}-ux"><div class="loading">Loading UX Guide data...</div></div>`;
 
   panel.innerHTML = html;
   panel.dataset.rendered = '1';
 
-  panel.querySelectorAll('tr.rw').forEach(row => {
+  // Row click handlers for Role 3
+  panel.querySelectorAll('#sub-'+market+'-oos tr.rw').forEach(row => {
     row.addEventListener('click', () => {
       const dp = row.nextElementSibling?.querySelector('.dp');
       if (dp) dp.classList.toggle('open');
@@ -210,142 +259,288 @@ async function renderMarket(market) {
   });
 }
 
-function updateHeader(d, market) {
-  const flag = market === 'KR' ? '🇰🇷' : '🇺🇸';
-  const mktLabel = market === 'KR' ? 'Korea' : 'US';
-  document.getElementById('main-title').innerHTML =
-    `${flag} Signal OOS Dashboard <span class="oos-range">${d.oos_start} ~ now</span>`;
+// ============================================================
+// Role 4 UX Guide Rendering
+// ============================================================
+async function renderUxPanel(market) {
+  const container = document.getElementById(`sub-${market}-ux`);
+  if (container.dataset.rendered) return;
 
-  const updatedKR = d.updated_at_kr || d.generated_at || '';
-  document.getElementById('gen-info').textContent =
-    `${mktLabel} | 아래 성과는 시그널 발생 후 ${d.main_hp}거래일 보유 기준 | Updated: ${updatedKR}`;
+  const ux = await loadUxData(market);
+  if (!ux) { container.innerHTML = '<div class="error">UX 데이터 없음 — update_role4() 실행 필요</div>'; return; }
+
+  const hps = ux.holding_periods || [1,3,5,10,15,20];
+  const mainHp = ux.main_hp || 10;
+  const periods = ux.data_periods || {};
+  const sigs = ux.signals || {};
+  const codes = Object.keys(sigs).sort();
+
+  let html = `<div class="stats">
+    <div class="sc"><div class="lb">Signals</div><div class="vl">${codes.length}</div></div>
+    <div class="sc"><div class="lb">Data Period</div><div class="vl" style="font-size:13px">${periods.full?.start || '?'} ~</div></div>
+    <div class="sc"><div class="lb">Main HP</div><div class="vl">${mainHp}D</div></div>
+    <div class="info-btn" onclick="document.getElementById('methModal').classList.add('open')" title="지표 설명">ℹ️</div>
+  </div>`;
+
+  // Controls
+  html += `<div class="ux-controls">
+    <label style="font-size:12px;color:var(--tx2)">보유기간:</label>
+    <select class="ux-select" id="ux-hp-${market}" onchange="updateUxCards('${market}')">
+      ${hps.map(h => `<option value="${h}" ${h===mainHp?'selected':''}>${h}D</option>`).join('')}
+    </select>
+    <div class="ux-toggle" id="ux-period-${market}">
+      <button class="ux-toggle-btn active" data-period="full" onclick="setUxPeriod('${market}','full',this)">전체 기간</button>
+      <button class="ux-toggle-btn" data-period="recent" onclick="setUxPeriod('${market}','recent',this)">최근 3년</button>
+    </div>
+  </div>`;
+
+  // Signal cards
+  html += `<div id="ux-cards-${market}">`;
+  codes.forEach(sc => {
+    html += `<div class="ux-card" id="ux-card-${market}-${sc}" data-code="${sc}"></div>`;
+  });
+  html += `</div>`;
+
+  container.innerHTML = html;
+  container.dataset.rendered = '1';
+  updateUxCards(market);
 }
 
-// ============================================================
-// BM Chart (SVG)
-// ============================================================
-function buildBmChart(d, market) {
-  const bm = d.bm_chart;
-  if (!bm || !bm.dates || bm.dates.length < 2) {
-    return '<div class="bm-chart-wrap"><h3>Benchmark Index (OOS period)</h3><div style="color:var(--tx2);font-size:12px">No benchmark data</div></div>';
-  }
+function setUxPeriod(market, period, btn) {
+  const toggle = document.getElementById(`ux-period-${market}`);
+  toggle.querySelectorAll('.ux-toggle-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  updateUxCards(market);
+}
 
-  const bmName = market === 'KR' ? 'KOSPI' : 'S&P 500';
-  const W = 800, H = 200, P = 50, PR = 70;
-  const dates = bm.dates;
-  const vals = bm.values;
-  const rets = bm.cum_returns; // cumulative return from OOS start (%)
+function getUxPeriodKey(market) {
+  const toggle = document.getElementById(`ux-period-${market}`);
+  const active = toggle.querySelector('.ux-toggle-btn.active');
+  return active?.dataset.period === 'recent' ? 'recent_3y' : 'full';
+}
 
-  const yMn = Math.min(0, ...rets) - 1;
-  const yMx = Math.max(0, ...rets) + 1;
-  const xS = i => P + (i / (dates.length - 1)) * (W - P - PR);
-  const yS = v => 15 + (yMx - v) / (yMx - yMn || 1) * (H - 45);
+function updateUxCards(market) {
+  const ux = UX_DATA[market];
+  if (!ux) return;
+  const hp = document.getElementById(`ux-hp-${market}`).value;
+  const periodKey = getUxPeriodKey(market);
+  const sigs = ux.signals;
+
+  Object.keys(sigs).sort().forEach(sc => {
+    const card = document.getElementById(`ux-card-${market}-${sc}`);
+    if (!card) return;
+    const sig = sigs[sc];
+    const hpData = sig.by_hp?.[hp]?.[periodKey];
+
+    if (!hpData || sig.status === 'NO_DATA') {
+      card.innerHTML = `<div class="ux-card-header">
+        <h3><span class="code">${sc}</span> ${sig.name}</h3>
+        <span class="st st-NO_DATA">NO DATA</span>
+      </div><div style="color:var(--tx2);font-size:12px">데이터 부족 (N < 5 또는 기간 없음)</div>`;
+      return;
+    }
+
+    const mae = hpData.mae_raw, mfe = hpData.mfe_raw;
+    const maeAr = hpData.mae_ar, mfeAr = hpData.mfe_ar;
+    const pain = hpData.pain_ratio_raw, painAr = hpData.pain_ratio_ar;
+    const fr = hpData.final_raw, fa = hpData.final_ar;
+
+    let h = `<div class="ux-card-header">
+      <h3><span class="code">${sc}</span> ${sig.name}
+        <span style="font-size:11px;color:var(--tx2);margin-left:8px">${sig.ux?.toUpperCase()}</span>
+      </h3>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-size:11px;color:var(--tx2)">N=${hpData.n}</span>
+        <span class="st st-${sig.status}">${sig.status}</span>
+      </div>
+    </div>`;
+
+    // Metrics row
+    h += `<div class="ux-metrics">
+      <div class="ux-metric"><div class="label">MAE Median (Raw)</div><div class="value ng">${mae?.median!=null?mae.median.toFixed(1)+'%':'-'}</div></div>
+      <div class="ux-metric"><div class="label">MFE Median (Raw)</div><div class="value ps">${mfe?.median!=null?'+'+mfe.median.toFixed(1)+'%':'-'}</div></div>
+      <div class="ux-metric"><div class="label">Pain Ratio (Raw)</div><div class="value" style="color:${pain>15?'var(--red)':pain>8?'var(--ylw)':'var(--grn)'}">${pain!=null?pain.toFixed(1)+'%':'-'}</div></div>
+      <div class="ux-metric"><div class="label">MAE Median (AR)</div><div class="value ng">${maeAr?.median!=null?maeAr.median.toFixed(1)+'%':'-'}</div></div>
+      <div class="ux-metric"><div class="label">MFE Median (AR)</div><div class="value ps">${mfeAr?.median!=null?'+'+mfeAr.median.toFixed(1)+'%':'-'}</div></div>
+      <div class="ux-metric"><div class="label">Pain Ratio (AR)</div><div class="value" style="color:${painAr>15?'var(--red)':painAr>8?'var(--ylw)':'var(--grn)'}">${painAr!=null?painAr.toFixed(1)+'%':'-'}</div></div>
+    </div>`;
+
+    // Detail: Avg Path + MAE/MFE table
+    h += `<div class="ux-detail">`;
+
+    // Left: Avg Path Chart
+    h += `<div class="ux-chart-wrap"><h4>평균 수익률 경로 (±1σ)</h4>`;
+    h += svgAvgPath(hpData.avg_path_raw, hpData.avg_path_ar, sig.ux);
+    h += `<div class="legend" style="margin-top:6px">
+      <span><div class="dot" style="background:#3b82f6"></div>Raw</span>
+      <span><div class="dot" style="background:#8b5cf6"></div>AR</span>
+      <span style="opacity:.6"><div class="dot" style="background:#3b82f6;opacity:.2;height:8px"></div>±1σ</span>
+    </div></div>`;
+
+    // Right: MAE/MFE percentile table
+    h += `<div class="ux-chart-wrap"><h4>MAE / MFE 분포 (Percentiles)</h4>`;
+    h += `<table class="dt"><thead><tr><th></th><th class="n">P5</th><th class="n">P25</th><th class="n">Med</th><th class="n">P75</th><th class="n">P95</th></tr></thead><tbody>`;
+    [{l:'MAE Raw',d:mae,c:'ng'},{l:'MFE Raw',d:mfe,c:'ps'},{l:'MAE AR',d:maeAr,c:'ng'},{l:'MFE AR',d:mfeAr,c:'ps'}].forEach(r => {
+      if (!r.d) return;
+      h += `<tr><td style="font-size:10px;color:var(--tx2)">${r.l}</td>`;
+      ['p5','p25','median','p75','p95'].forEach(k => {
+        h += `<td class="n ${r.c}">${r.d[k]!=null?(r.d[k]>0?'+':'')+r.d[k].toFixed(1)+'%':'-'}</td>`;
+      });
+      h += `</tr>`;
+    });
+    h += `</tbody></table>`;
+
+    // Distribution stats
+    if (fr) {
+      h += `<h4 style="margin-top:12px;font-size:11px;color:var(--tx2)">최종 수익률 분포</h4>`;
+      h += `<div style="font-size:11px;font-family:'JetBrains Mono',monospace;line-height:1.8">`;
+      h += `<div>Raw: mean=${fr.mean>0?'+':''}${fr.mean}% med=${fr.median>0?'+':''}${fr.median}% skew=${fr.skew} kurt=${fr.kurt}</div>`;
+      if (fa) h += `<div>AR&nbsp;: mean=${fa.mean>0?'+':''}${fa.mean}% med=${fa.median>0?'+':''}${fa.median}% skew=${fa.skew} kurt=${fa.kurt}</div>`;
+      h += `</div>`;
+    }
+    h += `</div></div>`;
+
+    card.innerHTML = h;
+  });
+}
+
+function svgAvgPath(rawPath, arPath, uxType) {
+  if ((!rawPath || rawPath.length < 2) && (!arPath || arPath.length < 2))
+    return '<div style="color:var(--tx2);font-size:11px">No path data</div>';
+
+  const W=420, H=180, P=42, PR=20;
+  const paths = [...(rawPath||[]), ...(arPath||[])];
+  const allV = paths.flatMap(p => [p.upper||p.mean, p.lower||p.mean, p.mean]);
+  const allD = paths.map(p => p.day);
+  const yMn = Math.min(0, ...allV)-0.5, yMx = Math.max(0, ...allV)+0.5;
+  const dMn = Math.min(...allD), dMx = Math.max(...allD);
+  const xS = d => P + (d-dMn)/(dMx-dMn||1) * (W-P-PR);
+  const yS = v => 12 + (yMx-v)/(yMx-yMn||1) * (H-36);
   const z = yS(0);
 
-  const lastRet = rets[rets.length - 1];
-  const color = lastRet >= 0 ? '#22c55e' : '#ef4444';
+  let s = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" style="width:100%">`;
+  s += `<line x1="${P}" y1="${z}" x2="${W-PR}" y2="${z}" stroke="#4a5568" stroke-dasharray="4"/>`;
 
-  let svg = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" style="width:100%">`;
-  // Zero line
-  svg += `<line x1="${P}" y1="${z}" x2="${W-PR}" y2="${z}" stroke="#4a5568" stroke-dasharray="4"/>`;
-  // Area fill
-  const pts = rets.map((v, i) => `${xS(i)},${yS(v)}`).join(' ');
-  svg += `<polygon points="${xS(0)},${z} ${pts} ${xS(rets.length-1)},${z}" fill="${color}" opacity="0.08"/>`;
-  // Line
-  svg += `<polyline points="${pts}" fill="none" stroke="${color}" stroke-width="2" stroke-linejoin="round"/>`;
-  // End point + label
-  const lastX = xS(rets.length - 1), lastY = yS(lastRet);
-  svg += `<circle cx="${lastX}" cy="${lastY}" r="4" fill="${color}"/>`;
-  svg += `<text x="${lastX+10}" y="${lastY+5}" fill="${color}" font-size="13" font-weight="bold" font-family="JetBrains Mono,monospace">${lastRet >= 0 ? '+' : ''}${lastRet.toFixed(1)}%</text>`;
-  // Min point annotation
-  const minRet = Math.min(...rets);
-  const minIdx = rets.indexOf(minRet);
-  if (minRet < -1 && minIdx !== rets.length - 1) {
-    svg += `<circle cx="${xS(minIdx)}" cy="${yS(minRet)}" r="3" fill="#ef4444" opacity="0.6"/>`;
-    svg += `<text x="${xS(minIdx)}" y="${yS(minRet)+14}" fill="#ef4444" font-size="10" text-anchor="middle" font-family="monospace">${minRet.toFixed(1)}%</text>`;
+  // Raw path (blue) with ±1σ shading
+  if (rawPath && rawPath.length >= 2) {
+    // σ band
+    const bandPts = rawPath.map(p => `${xS(p.day)},${yS(p.upper||p.mean)}`).join(' ');
+    const bandPtsRev = [...rawPath].reverse().map(p => `${xS(p.day)},${yS(p.lower||p.mean)}`).join(' ');
+    s += `<polygon points="${bandPts} ${bandPtsRev}" fill="#3b82f6" opacity="0.1"/>`;
+    // Mean line
+    const rp = rawPath.map(p => `${xS(p.day)},${yS(p.mean)}`).join(' ');
+    s += `<polyline points="${rp}" fill="none" stroke="#3b82f6" stroke-width="2" stroke-linejoin="round"/>`;
+    // End label
+    const last = rawPath[rawPath.length-1];
+    s += `<text x="${xS(last.day)+6}" y="${yS(last.mean)+4}" fill="#3b82f6" font-size="9" font-family="monospace">${last.mean>0?'+':''}${last.mean.toFixed(1)}%</text>`;
   }
-  // Max point annotation
-  const maxRet = Math.max(...rets);
-  const maxIdx = rets.indexOf(maxRet);
-  if (maxRet > 1 && maxIdx !== rets.length - 1) {
-    svg += `<circle cx="${xS(maxIdx)}" cy="${yS(maxRet)}" r="3" fill="#22c55e" opacity="0.6"/>`;
-    svg += `<text x="${xS(maxIdx)}" y="${yS(maxRet)-8}" fill="#22c55e" font-size="10" text-anchor="middle" font-family="monospace">+${maxRet.toFixed(1)}%</text>`;
-  }
-  // Start label
-  svg += `<text x="${xS(0)}" y="${H-4}" fill="#64748b" font-size="10" text-anchor="start" font-family="monospace">${dates[0]}</text>`;
-  // End label
-  svg += `<text x="${lastX}" y="${H-4}" fill="#64748b" font-size="10" text-anchor="end" font-family="monospace">${dates[dates.length-1]}</text>`;
-  // Mid label
-  if (dates.length > 10) {
-    const midI = Math.floor(dates.length / 2);
-    svg += `<text x="${xS(midI)}" y="${H-4}" fill="#64748b" font-size="10" text-anchor="middle" font-family="monospace">${dates[midI]}</text>`;
-  }
-  // Y axis labels
-  svg += `<text x="${P-4}" y="${z+4}" fill="#64748b" font-size="10" text-anchor="end" font-family="monospace">0%</text>`;
-  const yTop = Math.ceil(yMx);
-  const yBot = Math.floor(yMn);
-  if (yTop > 0) svg += `<text x="${P-4}" y="${yS(yTop)+4}" fill="#64748b" font-size="10" text-anchor="end" font-family="monospace">+${yTop}%</text>`;
-  if (yBot < 0) svg += `<text x="${P-4}" y="${yS(yBot)+4}" fill="#64748b" font-size="10" text-anchor="end" font-family="monospace">${yBot}%</text>`;
 
-  svg += '</svg>';
+  // AR path (purple) with ±1σ shading
+  if (arPath && arPath.length >= 2) {
+    const bandPts = arPath.map(p => `${xS(p.day)},${yS(p.upper||p.mean)}`).join(' ');
+    const bandPtsRev = [...arPath].reverse().map(p => `${xS(p.day)},${yS(p.lower||p.mean)}`).join(' ');
+    s += `<polygon points="${bandPts} ${bandPtsRev}" fill="#8b5cf6" opacity="0.1"/>`;
+    const ap = arPath.map(p => `${xS(p.day)},${yS(p.mean)}`).join(' ');
+    s += `<polyline points="${ap}" fill="none" stroke="#8b5cf6" stroke-width="2" stroke-dasharray="6,3" stroke-linejoin="round"/>`;
+    const last = arPath[arPath.length-1];
+    s += `<text x="${xS(last.day)+6}" y="${yS(last.mean)+14}" fill="#8b5cf6" font-size="9" font-family="monospace">${last.mean>0?'+':''}${last.mean.toFixed(1)}%</text>`;
+  }
 
-  return `<div class="bm-chart-wrap">
-    <h3>${bmName} Cumulative Return (since ${d.oos_start})</h3>
-    ${svg}
-  </div>`;
+  // X axis labels
+  const udays = [...new Set(allD)].sort((a,b)=>a-b);
+  const step = udays.length > 10 ? Math.ceil(udays.length/6) : 1;
+  udays.forEach((d,i) => {
+    if (i % step === 0 || d === dMx)
+      s += `<text x="${xS(d)}" y="${H-2}" fill="#64748b" font-size="9" text-anchor="middle" font-family="monospace">${d}D</text>`;
+  });
+
+  // Y axis
+  s += `<text x="${P-4}" y="${z+4}" fill="#64748b" font-size="9" text-anchor="end" font-family="monospace">0%</text>`;
+  s += `</svg>`;
+  return s;
 }
 
 // ============================================================
-// Helpers
+// Role 3 functions (unchanged)
 // ============================================================
+function updateHeader(d, market) {
+  const flag = market==='KR'?'🇰🇷':'🇺🇸';
+  const mktLabel = market==='KR'?'Korea':'US';
+  document.getElementById('main-title').innerHTML = `${flag} Signal OOS Dashboard <span class="oos-range">${d.oos_start} ~ now</span>`;
+  const updatedKR = d.updated_at_kr || d.generated_at || '';
+  document.getElementById('gen-info').textContent = `${mktLabel} | 아래 성과는 시그널 발생 후 ${d.main_hp}거래일 보유 기준 | Updated: ${updatedKR}`;
+}
+
+function buildBmChart(d, market) {
+  const bm=d.bm_chart;
+  if (!bm||!bm.dates||bm.dates.length<2) return '<div class="bm-chart-wrap"><h3>Benchmark Index (OOS period)</h3><div style="color:var(--tx2);font-size:12px">No benchmark data</div></div>';
+  const bmName=market==='KR'?'KOSPI':'S&P 500';
+  const W=800,H=200,P=50,PR=70;
+  const dates=bm.dates,vals=bm.values,rets=bm.cum_returns;
+  const yMn=Math.min(0,...rets)-1,yMx=Math.max(0,...rets)+1;
+  const xS=i=>P+(i/(dates.length-1))*(W-P-PR);
+  const yS=v=>15+(yMx-v)/(yMx-yMn||1)*(H-45);
+  const z=yS(0);
+  const lastRet=rets[rets.length-1];
+  const color=lastRet>=0?'#22c55e':'#ef4444';
+  let svg=`<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" style="width:100%">`;
+  svg+=`<line x1="${P}" y1="${z}" x2="${W-PR}" y2="${z}" stroke="#4a5568" stroke-dasharray="4"/>`;
+  const pts=rets.map((v,i)=>`${xS(i)},${yS(v)}`).join(' ');
+  svg+=`<polygon points="${xS(0)},${z} ${pts} ${xS(rets.length-1)},${z}" fill="${color}" opacity="0.08"/>`;
+  svg+=`<polyline points="${pts}" fill="none" stroke="${color}" stroke-width="2" stroke-linejoin="round"/>`;
+  const lastX=xS(rets.length-1),lastY=yS(lastRet);
+  svg+=`<circle cx="${lastX}" cy="${lastY}" r="4" fill="${color}"/>`;
+  svg+=`<text x="${lastX+10}" y="${lastY+5}" fill="${color}" font-size="13" font-weight="bold" font-family="JetBrains Mono,monospace">${lastRet>=0?'+':''}${lastRet.toFixed(1)}%</text>`;
+  const minRet=Math.min(...rets),minIdx=rets.indexOf(minRet);
+  if(minRet<-1&&minIdx!==rets.length-1){svg+=`<circle cx="${xS(minIdx)}" cy="${yS(minRet)}" r="3" fill="#ef4444" opacity="0.6"/>`;svg+=`<text x="${xS(minIdx)}" y="${yS(minRet)+14}" fill="#ef4444" font-size="10" text-anchor="middle" font-family="monospace">${minRet.toFixed(1)}%</text>`;}
+  const maxRet=Math.max(...rets),maxIdx=rets.indexOf(maxRet);
+  if(maxRet>1&&maxIdx!==rets.length-1){svg+=`<circle cx="${xS(maxIdx)}" cy="${yS(maxRet)}" r="3" fill="#22c55e" opacity="0.6"/>`;svg+=`<text x="${xS(maxIdx)}" y="${yS(maxRet)-8}" fill="#22c55e" font-size="10" text-anchor="middle" font-family="monospace">+${maxRet.toFixed(1)}%</text>`;}
+  svg+=`<text x="${xS(0)}" y="${H-4}" fill="#64748b" font-size="10" text-anchor="start" font-family="monospace">${dates[0]}</text>`;
+  svg+=`<text x="${lastX}" y="${H-4}" fill="#64748b" font-size="10" text-anchor="end" font-family="monospace">${dates[dates.length-1]}</text>`;
+  if(dates.length>10){const midI=Math.floor(dates.length/2);svg+=`<text x="${xS(midI)}" y="${H-4}" fill="#64748b" font-size="10" text-anchor="middle" font-family="monospace">${dates[midI]}</text>`;}
+  svg+=`<text x="${P-4}" y="${z+4}" fill="#64748b" font-size="10" text-anchor="end" font-family="monospace">0%</text>`;
+  const yTop=Math.ceil(yMx),yBot=Math.floor(yMn);
+  if(yTop>0)svg+=`<text x="${P-4}" y="${yS(yTop)+4}" fill="#64748b" font-size="10" text-anchor="end" font-family="monospace">+${yTop}%</text>`;
+  if(yBot<0)svg+=`<text x="${P-4}" y="${yS(yBot)+4}" fill="#64748b" font-size="10" text-anchor="end" font-family="monospace">${yBot}%</text>`;
+  svg+='</svg>';
+  return `<div class="bm-chart-wrap"><h3>${bmName} Cumulative Return (since ${d.oos_start})</h3>${svg}</div>`;
+}
+
 function fp(v,s){if(v==null||isNaN(v))return"-";return(s&&v>0?"+":"")+v.toFixed(2)+"%";}
 function fP(v){return v==null||isNaN(v)?"-":v.toFixed(4);}
 function ac(v,t){if(v==null)return"nt";if(t==="risk")return v<0?"ps":v>0?"ng":"nt";return v>0?"ps":v<0?"ng":"nt";}
 
-function buildSection(title, badgeCls, badgeText, sigs, sType, mkt) {
+function buildSection(title,badgeCls,badgeText,sigs,sType,mkt){
   sigs.sort((a,b)=>(a.p||1)-(b.p||1));
-  let h = `<div class="section"><div class="sh"><h2>${title}</h2><span class="badge ${badgeCls}">${badgeText}</span></div>`;
-  h += `<table><thead><tr><th>Code</th><th>Signal</th><th class="n">N</th><th class="n">Raw Ret</th><th class="n">Raw Hit</th><th class="n">AR^gross</th><th class="n">t(FM)</th><th class="n">AHR</th><th class="n">p-value</th><th>Status</th></tr></thead><tbody>`;
-  sigs.forEach((s,i) => {
-    const id = `dp-${mkt}-${sType}-${i}`;
-    if (s.status==="NO_DATA") {
-      h += `<tr class="rw"><td class="mono">${s.code}</td><td>${s.name}</td><td class="n nt">-</td><td class="n nt">-</td><td class="n nt">-</td><td class="n nt">-</td><td class="n nt">-</td><td class="n nt">-</td><td class="n nt">-</td><td><span class="st st-NO_DATA">NO DATA</span></td></tr>`;
-      h += `<tr><td colspan="10"><div class="dp" id="${id}"></div></td></tr>`;
-    } else {
-      const c=ac(s.ar,sType), rc=ac(s.raw_ret,sType);
-      h += `<tr class="rw"><td class="mono">${s.code}</td><td>${s.name}</td><td class="n">${s.n||"-"}</td><td class="n ${rc}">${fp(s.raw_ret,true)}</td><td class="n">${s.raw_hit!=null?s.raw_hit.toFixed(1)+"%":"-"}</td><td class="n ${c}">${fp(s.ar,true)}</td><td class="n ${c}">${s.t!=null?s.t.toFixed(2):"-"}</td><td class="n">${s.ahr!=null?s.ahr.toFixed(1)+"%":"-"}</td><td class="n">${fP(s.p)}</td><td><span class="st st-${s.status}">${s.status}</span></td></tr>`;
-      h += `<tr><td colspan="10"><div class="dp" id="${id}">${buildDirDetail(s, sType)}</div></td></tr>`;
-    }
+  let h=`<div class="section"><div class="sh"><h2>${title}</h2><span class="badge ${badgeCls}">${badgeText}</span></div>`;
+  h+=`<table><thead><tr><th>Code</th><th>Signal</th><th class="n">N</th><th class="n">Raw Ret</th><th class="n">Raw Hit</th><th class="n">AR^gross</th><th class="n">t(FM)</th><th class="n">AHR</th><th class="n">p-value</th><th>Status</th></tr></thead><tbody>`;
+  sigs.forEach((s,i)=>{
+    const id=`dp-${mkt}-${sType}-${i}`;
+    if(s.status==="NO_DATA"){h+=`<tr class="rw"><td class="mono">${s.code}</td><td>${s.name}</td><td class="n nt">-</td><td class="n nt">-</td><td class="n nt">-</td><td class="n nt">-</td><td class="n nt">-</td><td class="n nt">-</td><td class="n nt">-</td><td><span class="st st-NO_DATA">NO DATA</span></td></tr>`;h+=`<tr><td colspan="10"><div class="dp" id="${id}"></div></td></tr>`;}
+    else{const c=ac(s.ar,sType),rc=ac(s.raw_ret,sType);h+=`<tr class="rw"><td class="mono">${s.code}</td><td>${s.name}</td><td class="n">${s.n||"-"}</td><td class="n ${rc}">${fp(s.raw_ret,true)}</td><td class="n">${s.raw_hit!=null?s.raw_hit.toFixed(1)+"%":"-"}</td><td class="n ${c}">${fp(s.ar,true)}</td><td class="n ${c}">${s.t!=null?s.t.toFixed(2):"-"}</td><td class="n">${s.ahr!=null?s.ahr.toFixed(1)+"%":"-"}</td><td class="n">${fP(s.p)}</td><td><span class="st st-${s.status}">${s.status}</span></td></tr>`;h+=`<tr><td colspan="10"><div class="dp" id="${id}">${buildDirDetail(s,sType)}</div></td></tr>`;}
   });
-  h += `</tbody></table></div>`;
-  return h;
+  h+=`</tbody></table></div>`;return h;
 }
 
-function buildFlowSection(title, sigs, mkt) {
+function buildFlowSection(title,sigs,mkt){
   sigs.sort((a,b)=>(b.abs_ar||0)-(a.abs_ar||0));
-  let h = `<div class="section"><div class="sh"><h2>${title}</h2><span class="badge bf">|움직임| 크기</span></div>`;
-  h += `<table><thead><tr><th>Code</th><th>Signal</th><th class="n">N</th><th class="n">|Raw| avg</th><th class="n">|AR| avg</th><th class="n">t-stat</th><th class="n">Up %</th><th class="n">p-value</th><th>Status</th></tr></thead><tbody>`;
-  sigs.forEach((s,i) => {
-    const id = `dp-${mkt}-flow-${i}`;
-    if (s.status==="NO_DATA") {
-      h += `<tr class="rw"><td class="mono">${s.code}</td><td>${s.name}</td><td class="n nt">-</td><td class="n nt">-</td><td class="n nt">-</td><td class="n nt">-</td><td class="n nt">-</td><td class="n nt">-</td><td><span class="st st-NO_DATA">NO DATA</span></td></tr>`;
-      h += `<tr><td colspan="9"><div class="dp" id="${id}"></div></td></tr>`;
-    } else {
-      h += `<tr class="rw"><td class="mono">${s.code}</td><td>${s.name}</td><td class="n">${s.n||"-"}</td><td class="n">${fp(s.raw_abs,false)}</td><td class="n" style="color:var(--prp)">${fp(s.abs_ar,false)}</td><td class="n">${s.t!=null?s.t.toFixed(2):"-"}</td><td class="n">${s.up_pct!=null?s.up_pct.toFixed(1)+"%":"-"}</td><td class="n">${fP(s.p)}</td><td><span class="st st-${s.status}">${s.status}</span></td></tr>`;
-      h += `<tr><td colspan="9"><div class="dp" id="${id}">${buildFlowDetail(s)}</div></td></tr>`;
-    }
+  let h=`<div class="section"><div class="sh"><h2>${title}</h2><span class="badge bf">|움직임| 크기</span></div>`;
+  h+=`<table><thead><tr><th>Code</th><th>Signal</th><th class="n">N</th><th class="n">|Raw| avg</th><th class="n">|AR| avg</th><th class="n">t-stat</th><th class="n">Up %</th><th class="n">p-value</th><th>Status</th></tr></thead><tbody>`;
+  sigs.forEach((s,i)=>{
+    const id=`dp-${mkt}-flow-${i}`;
+    if(s.status==="NO_DATA"){h+=`<tr class="rw"><td class="mono">${s.code}</td><td>${s.name}</td><td class="n nt">-</td><td class="n nt">-</td><td class="n nt">-</td><td class="n nt">-</td><td class="n nt">-</td><td class="n nt">-</td><td><span class="st st-NO_DATA">NO DATA</span></td></tr>`;h+=`<tr><td colspan="9"><div class="dp" id="${id}"></div></td></tr>`;}
+    else{h+=`<tr class="rw"><td class="mono">${s.code}</td><td>${s.name}</td><td class="n">${s.n||"-"}</td><td class="n">${fp(s.raw_abs,false)}</td><td class="n" style="color:var(--prp)">${fp(s.abs_ar,false)}</td><td class="n">${s.t!=null?s.t.toFixed(2):"-"}</td><td class="n">${s.up_pct!=null?s.up_pct.toFixed(1)+"%":"-"}</td><td class="n">${fP(s.p)}</td><td><span class="st st-${s.status}">${s.status}</span></td></tr>`;h+=`<tr><td colspan="9"><div class="dp" id="${id}">${buildFlowDetail(s)}</div></td></tr>`;}
   });
-  h += `</tbody></table></div>`;
-  return h;
+  h+=`</tbody></table></div>`;return h;
 }
 
-function svgCAR(raw, ar, sType) {
-  if (!ar||ar.length<2) return '<div style="color:var(--tx2);font-size:11px">No data</div>';
+function svgCAR(raw,ar,sType){
+  if(!ar||ar.length<2)return'<div style="color:var(--tx2);font-size:11px">No data</div>';
   const W=400,H=190,P=42;
   const allV=[...raw.map(c=>c.v),...ar.map(c=>c.v)];
   const allD=[...new Set([...raw.map(c=>c.day),...ar.map(c=>c.day)])].sort((a,b)=>a-b);
-  const yMn=Math.min(0,...allV)-1, yMx=Math.max(0,...allV)+1;
-  const dMn=allD[0], dMx=allD[allD.length-1];
+  const yMn=Math.min(0,...allV)-1,yMx=Math.max(0,...allV)+1;
+  const dMn=allD[0],dMx=allD[allD.length-1];
   const xS=d=>P+(d-dMn)/(dMx-dMn||1)*(W-P*2);
   const yS=v=>P+(yMx-v)/(yMx-yMn||1)*(H-P*2);
   const col=sType==="risk"?"#ef4444":"#3b82f6";
@@ -361,29 +556,23 @@ function svgCAR(raw, ar, sType) {
   s+=`</svg>`;return s;
 }
 
-function buildDirDetail(s, sType) {
-  if (!s.detail) return '';
-  const d=s.detail;
+function buildDirDetail(s,sType){
+  if(!s.detail)return'';const d=s.detail;
   let pt=`<table class="dt"><thead><tr><th>Hold</th><th class="n">N</th><th class="n" style="color:var(--tx2)">Raw Ret</th><th class="n" style="color:var(--tx2)">Raw Hit</th><th class="n sep">AR^gross</th><th class="n">t(FM)</th><th class="n">AHR</th><th class="n">p-value</th></tr></thead><tbody>`;
   d.perf.forEach(r=>{const c=ac(r.ar,sType),rc=ac(r.raw_ret,sType);const sg=r.p<0.01?"***":r.p<0.05?"**":r.p<0.1?"*":"";pt+=`<tr><td>${r.hp}D</td><td class="n">${r.n}</td><td class="n ${rc}">${fp(r.raw_ret,true)}</td><td class="n">${r.raw_hit.toFixed(1)}%</td><td class="n sep ${c}">${fp(r.ar,true)}</td><td class="n ${c}">${r.t.toFixed(2)}</td><td class="n">${r.ahr.toFixed(1)}%</td><td class="n">${r.p.toFixed(4)}${sg}</td></tr>`;});
   pt+="</tbody></table>";
-  const chart = svgCAR(d.car_raw||[], d.car_ar||[], sType);
-  let rc='<div class="rc">';
-  (d.recent||[]).forEach(r=>{rc+=`<div><span class="dd">${r.date}</span> (${r.n}): ${r.tickers.join(", ")}</div>`;});
-  rc+="</div>";
+  const chart=svgCAR(d.car_raw||[],d.car_ar||[],sType);
+  let rc='<div class="rc">';(d.recent||[]).forEach(r=>{rc+=`<div><span class="dd">${r.date}</span> (${r.n}): ${r.tickers.join(", ")}</div>`;});rc+="</div>";
   const leg=`<div class="legend"><span><div class="dot" style="background:${sType==="risk"?"#ef4444":"#3b82f6"}"></div>AR^gross</span><span><div class="dot" style="background:#64748b"></div>Raw Return</span></div>`;
   return `<div class="dg"><div><h4 style="margin-bottom:10px;font-size:12px;color:var(--tx2)">Performance by Holding Period</h4>${pt}</div><div><h4 style="margin-bottom:6px;font-size:12px;color:var(--tx2)">CAR Curve</h4>${chart}${leg}<h4 style="margin:14px 0 6px;font-size:12px;color:var(--tx2)">Recent Events</h4>${rc}</div></div>`;
 }
 
-function buildFlowDetail(s) {
-  if (!s.detail) return '';
-  const d=s.detail;
+function buildFlowDetail(s){
+  if(!s.detail)return'';const d=s.detail;
   let pt=`<table class="dt"><thead><tr><th>Hold</th><th class="n">N</th><th class="n" style="color:var(--tx2)">|Raw|</th><th class="n sep" style="color:var(--prp)">|AR|</th><th class="n">t-stat</th><th class="n">Up %</th><th class="n">p-value</th></tr></thead><tbody>`;
   d.perf.forEach(r=>{pt+=`<tr><td>${r.hp}D</td><td class="n">${r.n}</td><td class="n">${r.raw_abs.toFixed(2)}%</td><td class="n sep" style="color:var(--prp)">${r.abs_ar.toFixed(2)}%</td><td class="n">${r.t.toFixed(2)}</td><td class="n">${r.up_pct.toFixed(1)}%</td><td class="n">${r.p.toFixed(4)}</td></tr>`;});
   pt+="</tbody></table>";
-  let rc='<div class="rc">';
-  (d.recent||[]).forEach(r=>{rc+=`<div><span class="dd">${r.date}</span> (${r.n}): ${r.tickers.join(", ")}</div>`;});
-  rc+="</div>";
+  let rc='<div class="rc">';(d.recent||[]).forEach(r=>{rc+=`<div><span class="dd">${r.date}</span> (${r.n}): ${r.tickers.join(", ")}</div>`;});rc+="</div>";
   return `<div class="dg"><div><h4 style="margin-bottom:10px;font-size:12px;color:var(--tx2)">Performance by Holding Period</h4>${pt}</div><div><h4 style="margin:0 0 6px;font-size:12px;color:var(--tx2)">Recent Events</h4>${rc}</div></div>`;
 }
 
