@@ -103,6 +103,21 @@ tbody td{padding:9px 11px;font-size:12px;}
 @media(max-width:900px){.ux-detail{grid-template-columns:1fr;}}
 .ux-chart-wrap{background:var(--sf2);border-radius:8px;padding:14px;}
 .ux-chart-wrap h4{font-size:11px;color:var(--tx2);margin-bottom:8px;}
+.ux-guide{background:var(--sf);border:1px solid var(--bd);border-radius:12px;margin-bottom:20px;overflow:hidden;}
+.ux-guide-toggle{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;cursor:pointer;transition:background .15s;}
+.ux-guide-toggle:hover{background:var(--sf2);}
+.ux-guide-toggle h3{font-size:13px;font-weight:600;color:var(--cyn);}
+.ux-guide-toggle .arrow{color:var(--tx2);font-size:14px;transition:transform .2s;}
+.ux-guide-toggle.open .arrow{transform:rotate(180deg);}
+.ux-guide-body{display:none;padding:0 20px 18px;font-size:12px;color:var(--tx2);line-height:1.8;}
+.ux-guide-body.open{display:block;}
+.ux-guide-body h4{font-size:12px;color:var(--tx);font-weight:600;margin:14px 0 6px;padding-top:10px;border-top:1px solid var(--bd);}
+.ux-guide-body h4:first-child{border-top:none;margin-top:4px;}
+.ux-guide-body .g-row{display:grid;grid-template-columns:140px 1fr;gap:4px 12px;margin:4px 0;}
+.ux-guide-body .g-label{color:var(--cyn);font-family:'JetBrains Mono',monospace;font-size:11px;}
+.ux-guide-body .g-desc{color:var(--tx2);}
+.ux-guide-body .status-row{display:flex;gap:12px;flex-wrap:wrap;margin:6px 0;}
+.ux-guide-body .status-item{display:flex;align-items:center;gap:6px;}
 </style>
 </head>
 <body>
@@ -280,6 +295,57 @@ async function renderUxPanel(market) {
     <div class="sc"><div class="lb">Data Period</div><div class="vl" style="font-size:13px">${periods.full?.start || '?'} ~</div></div>
     <div class="sc"><div class="lb">Main HP</div><div class="vl">${mainHp}D</div></div>
     <div class="info-btn" onclick="document.getElementById('methModal').classList.add('open')" title="지표 설명">ℹ️</div>
+  </div>`;
+
+  // Interpretation Guide
+  html += `<div class="ux-guide">
+    <div class="ux-guide-toggle" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open')">
+      <h3>📖 해석 가이드 — 각 지표의 의미와 읽는 법</h3>
+      <span class="arrow">▼</span>
+    </div>
+    <div class="ux-guide-body">
+
+      <h4>📊 상단 메트릭 카드 (6개)</h4>
+      <div class="g-row"><span class="g-label">MAE Median (Raw)</span><span class="g-desc">보유 기간 중 <strong>최대 낙폭</strong>의 중앙값. 종목 자체 가격 기준. 예: -3.4%면 "이 시그널을 따라간 이벤트 절반은 보유 중 최소 -3.4%까지 빠졌다"는 뜻.</span></div>
+      <div class="g-row"><span class="g-label">MFE Median (Raw)</span><span class="g-desc">보유 기간 중 <strong>최대 수익</strong>의 중앙값. 예: +4.2%면 절반의 이벤트가 보유 중 최소 +4.2%까지 올랐음.</span></div>
+      <div class="g-row"><span class="g-label">Pain Ratio (Raw)</span><span class="g-desc">MAE가 <strong>-10% 이하</strong>인 이벤트 비율. "10명 중 몇 명이 -10% 이상 물리는가". 20% 이상이면 HIGH_RISK.</span></div>
+      <div class="g-row"><span class="g-label">MAE Median (AR)</span><span class="g-desc">시장 지수(KOSPI/S&P500) 대비 초과수익 기준 최대 낙폭. 시장 전체가 빠졌을 때의 영향을 제거한 값.</span></div>
+      <div class="g-row"><span class="g-label">MFE Median (AR)</span><span class="g-desc">시장 대비 초과수익 기준 최대 수익. 시장이 올랐을 때의 효과를 제거하고 시그널 자체의 알파만 본 값.</span></div>
+      <div class="g-row"><span class="g-label">Pain Ratio (AR)</span><span class="g-desc">AR 기준 MAE가 -10% 이하인 비율. Raw보다 낮으면 시장 하락이 MAE의 주 원인이라는 뜻.</span></div>
+
+      <h4>📈 평균 수익률 경로 차트</h4>
+      <div class="g-row"><span class="g-label">파란 실선 (Raw)</span><span class="g-desc">매수 후 매일의 평균 누적수익률. "보통 며칠째에 수익이 나기 시작하는가"를 보여줌.</span></div>
+      <div class="g-row"><span class="g-label">보라 점선 (AR)</span><span class="g-desc">시장 대비 초과수익 경로. Raw와 방향이 다르면 시장 효과가 크다는 의미.</span></div>
+      <div class="g-row"><span class="g-label">음영 영역 (±1σ)</span><span class="g-desc">1 표준편차 범위. 음영이 넓으면 이벤트마다 편차가 크고, 좁으면 일관된 패턴.</span></div>
+
+      <h4>📋 MAE/MFE Percentile 테이블</h4>
+      <div class="g-row"><span class="g-label">P5</span><span class="g-desc">하위 5%. 최악의 경우 시나리오. MAE P5가 -20%면 "20건 중 1건은 -20%까지 빠진다".</span></div>
+      <div class="g-row"><span class="g-label">P25 / Med / P75</span><span class="g-desc">사분위. 중앙 50% 범위(P25~P75)가 실질적인 기대 범위.</span></div>
+      <div class="g-row"><span class="g-label">P95</span><span class="g-desc">상위 5%. MFE P95가 +15%면 "20건 중 1건은 +15% 이상 수익".</span></div>
+
+      <h4>📉 최종 수익률 분포</h4>
+      <div class="g-row"><span class="g-label">mean / med</span><span class="g-desc">평균과 중앙값. 차이가 크면 극단값의 영향이 큰 것. 중앙값이 더 신뢰할 만함.</span></div>
+      <div class="g-row"><span class="g-label">skew (왜도)</span><span class="g-desc">양수=오른쪽 꼬리(대박 가능성), 음수=왼쪽 꼬리(꼬리 위험). |skew| > 1이면 비대칭 뚜렷.</span></div>
+      <div class="g-row"><span class="g-label">kurt (첨도)</span><span class="g-desc">양수=뾰족한 분포(극단값 많음), 음수=납작한 분포. kurt > 3이면 fat tail 주의.</span></div>
+
+      <h4>🏷️ Status 판정</h4>
+      <div class="status-row">
+        <div class="status-item"><span class="st st-STABLE">STABLE</span> Pain &lt; 5%</div>
+        <div class="status-item"><span class="st st-LOW_RISK">LOW_RISK</span> Pain 5~10%</div>
+        <div class="status-item"><span class="st st-MODERATE">MODERATE</span> Pain 10~20%</div>
+        <div class="status-item"><span class="st st-HIGH_RISK">HIGH_RISK</span> Pain &gt; 20%</div>
+      </div>
+      <p style="margin-top:8px">Pain Ratio(Raw) 기준. Main HP(${mainHp}D) 보유 시 MAE &lt; -10% 비율로 판정.</p>
+
+      <h4>⚙️ 컨트롤</h4>
+      <div class="g-row"><span class="g-label">보유기간 드롭다운</span><span class="g-desc">선택한 HP에 따라 모든 지표가 재계산됨. 1D~20D.</span></div>
+      <div class="g-row"><span class="g-label">전체 기간 / 최근 3년</span><span class="g-desc">두 기간의 MAE 분포가 크게 다르면 시장 환경 의존성을 시사함.</span></div>
+
+      <h4>⚠️ 해석 시 주의</h4>
+      <p>• Raw 기준 MAE/MFE는 사용자가 <strong>실제 체감하는 낙폭/수익</strong>. UX 경고 문구의 주 입력값.<br>
+      • AR 기준은 시장 효과를 제거한 <strong>시그널 고유의 리스크</strong>. 참고용으로 병기.<br>
+      • N이 작은 시그널(특히 CR, FN 일부)은 분포 통계의 신뢰도가 낮음.</p>
+    </div>
   </div>`;
 
   // Controls
