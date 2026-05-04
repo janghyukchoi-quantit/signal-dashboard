@@ -329,21 +329,30 @@ async function renderUxPanel(market) {
       <div class="g-row"><span class="g-label">kurt (첨도)</span><span class="g-desc">양수=뾰족한 분포(극단값 많음), 음수=납작한 분포. kurt > 3이면 fat tail 주의.</span></div>
 
       <h4>🏷️ Status 판정</h4>
+      <p style="margin-bottom:6px"><strong>Opportunity / Flow 시그널</strong> (매수/보유 관점):</p>
       <div class="status-row">
         <div class="status-item"><span class="st st-STABLE">STABLE</span> Pain &lt; 5%</div>
         <div class="status-item"><span class="st st-LOW_RISK">LOW_RISK</span> Pain 5~10%</div>
         <div class="status-item"><span class="st st-MODERATE">MODERATE</span> Pain 10~20%</div>
         <div class="status-item"><span class="st st-HIGH_RISK">HIGH_RISK</span> Pain &gt; 20%</div>
       </div>
-      <p style="margin-top:8px">Pain Ratio(Raw) 기준. Main HP(${mainHp}D) 보유 시 MAE &lt; -10% 비율로 판정.</p>
+      <p style="margin-top:10px;margin-bottom:6px"><strong>Risk 시그널</strong> (매도/회피 관점) — 해석이 반대입니다:</p>
+      <p style="color:var(--tx);font-size:11px;line-height:1.7">
+        Risk 시그널의 MAE/Pain은 <em>"시그널을 무시하고 보유했을 때"</em>의 낙폭입니다.<br>
+        따라서 Pain Ratio가 <strong>높을수록 시그널이 잘 작동</strong>한 것입니다 (실제로 크게 빠졌으므로).<br>
+        카드에서 <span style="color:var(--red)">빨간 배경 안내문</span>이 표시되고, MAE/Pain 색상이 반전됩니다 (초록=큰 낙폭=작동).
+      </p>
 
       <h4>⚙️ 컨트롤</h4>
       <div class="g-row"><span class="g-label">보유기간 드롭다운</span><span class="g-desc">선택한 HP에 따라 모든 지표가 재계산됨. 1D~20D.</span></div>
       <div class="g-row"><span class="g-label">전체 기간 / 최근 3년</span><span class="g-desc">두 기간의 MAE 분포가 크게 다르면 시장 환경 의존성을 시사함.</span></div>
 
       <h4>⚠️ 해석 시 주의</h4>
-      <p>• Raw 기준 MAE/MFE는 사용자가 <strong>실제 체감하는 낙폭/수익</strong>. UX 경고 문구의 주 입력값.<br>
-      • AR 기준은 시장 효과를 제거한 <strong>시그널 고유의 리스크</strong>. 참고용으로 병기.<br>
+      <p>• <strong>Opportunity 시그널</strong>: MAE가 큼 = 매수 후 낙폭 위험 → UX 경고 필요.<br>
+      • <strong>Risk 시그널</strong>: MAE가 큼 = 시그널이 위험을 제대로 포착 → 시그널 검증. 카드에 반전 색상 적용됨.<br>
+      • <strong>Flow 시그널</strong>: 방향 무관, 움직임 크기가 핵심. MAE/MFE 모두 절대값으로 해석.<br>
+      • Raw 기준 = 사용자가 <strong>실제 체감하는 낙폭/수익</strong>. UX 경고 문구의 주 입력값.<br>
+      • AR 기준 = 시장 효과를 제거한 <strong>시그널 고유의 리스크</strong>. 참고용으로 병기.<br>
       • N이 작은 시그널(특히 CR, FN 일부)은 분포 통계의 신뢰도가 낮음.</p>
     </div>
   </div>`;
@@ -410,10 +419,12 @@ function updateUxCards(market) {
     const maeAr = hpData.mae_ar, mfeAr = hpData.mfe_ar;
     const pain = hpData.pain_ratio_raw, painAr = hpData.pain_ratio_ar;
     const fr = hpData.final_raw, fa = hpData.final_ar;
+    const isRisk = sig.ux === 'risk';
+    const isFlow = sig.ux === 'flow';
 
     let h = `<div class="ux-card-header">
       <h3><span class="code">${sc}</span> ${sig.name}
-        <span style="font-size:11px;color:var(--tx2);margin-left:8px">${sig.ux?.toUpperCase()}</span>
+        <span style="font-size:11px;color:${isRisk?'var(--red)':isFlow?'var(--prp)':'var(--grn)'};margin-left:8px">${sig.ux?.toUpperCase()}</span>
       </h3>
       <div style="display:flex;align-items:center;gap:8px">
         <span style="font-size:11px;color:var(--tx2)">N=${hpData.n}</span>
@@ -421,14 +432,34 @@ function updateUxCards(market) {
       </div>
     </div>`;
 
-    // Metrics row
+    // Risk signal context note
+    if (isRisk) {
+      h += `<div style="background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:8px;padding:8px 12px;margin-bottom:12px;font-size:11px;color:var(--tx2)">
+        ⚠️ <strong style="color:var(--red)">Risk 시그널</strong> — 의도된 행동은 <strong>매도/회피</strong>입니다. 
+        MAE가 크면 시그널이 제대로 작동한 것(실제로 빠졌음)을 의미합니다. 
+        아래 지표는 "이 시그널을 <em>무시하고 보유했을 때</em>"의 경로입니다.
+      </div>`;
+    }
+
+    // Metrics row — color logic differs for risk
+    const maeColor = isRisk ? (mae?.median < -5 ? 'var(--grn)' : 'var(--tx2)') : 'var(--red)';
+    const painColor = isRisk
+      ? (pain > 20 ? 'var(--grn)' : pain > 10 ? 'var(--ylw)' : 'var(--tx2)')
+      : (pain > 15 ? 'var(--red)' : pain > 8 ? 'var(--ylw)' : 'var(--grn)');
+    const painArColor = isRisk
+      ? (painAr > 20 ? 'var(--grn)' : painAr > 10 ? 'var(--ylw)' : 'var(--tx2)')
+      : (painAr > 15 ? 'var(--red)' : painAr > 8 ? 'var(--ylw)' : 'var(--grn)');
+
+    const maeLabel = isRisk ? 'MAE Median (Raw) ↓=작동' : 'MAE Median (Raw)';
+    const painLabel = isRisk ? 'Pain Ratio (Raw) ↑=작동' : 'Pain Ratio (Raw)';
+
     h += `<div class="ux-metrics">
-      <div class="ux-metric"><div class="label">MAE Median (Raw)</div><div class="value ng">${mae?.median!=null?mae.median.toFixed(1)+'%':'-'}</div></div>
+      <div class="ux-metric"><div class="label">${maeLabel}</div><div class="value" style="color:${maeColor}">${mae?.median!=null?mae.median.toFixed(1)+'%':'-'}</div></div>
       <div class="ux-metric"><div class="label">MFE Median (Raw)</div><div class="value ps">${mfe?.median!=null?'+'+mfe.median.toFixed(1)+'%':'-'}</div></div>
-      <div class="ux-metric"><div class="label">Pain Ratio (Raw)</div><div class="value" style="color:${pain>15?'var(--red)':pain>8?'var(--ylw)':'var(--grn)'}">${pain!=null?pain.toFixed(1)+'%':'-'}</div></div>
+      <div class="ux-metric"><div class="label">${painLabel}</div><div class="value" style="color:${painColor}">${pain!=null?pain.toFixed(1)+'%':'-'}</div></div>
       <div class="ux-metric"><div class="label">MAE Median (AR)</div><div class="value ng">${maeAr?.median!=null?maeAr.median.toFixed(1)+'%':'-'}</div></div>
       <div class="ux-metric"><div class="label">MFE Median (AR)</div><div class="value ps">${mfeAr?.median!=null?'+'+mfeAr.median.toFixed(1)+'%':'-'}</div></div>
-      <div class="ux-metric"><div class="label">Pain Ratio (AR)</div><div class="value" style="color:${painAr>15?'var(--red)':painAr>8?'var(--ylw)':'var(--grn)'}">${painAr!=null?painAr.toFixed(1)+'%':'-'}</div></div>
+      <div class="ux-metric"><div class="label">Pain Ratio (AR)</div><div class="value" style="color:${painArColor}">${painAr!=null?painAr.toFixed(1)+'%':'-'}</div></div>
     </div>`;
 
     // Detail: Avg Path + MAE/MFE table
@@ -474,7 +505,7 @@ function svgAvgPath(rawPath, arPath, uxType) {
   if ((!rawPath || rawPath.length < 2) && (!arPath || arPath.length < 2))
     return '<div style="color:var(--tx2);font-size:11px">No path data</div>';
 
-  const W=420, H=180, P=42, PR=20;
+  const W=480, H=180, P=42, PR=75;
   const paths = [...(rawPath||[]), ...(arPath||[])];
   const allV = paths.flatMap(p => [p.upper||p.mean, p.lower||p.mean, p.mean]);
   const allD = paths.map(p => p.day);
