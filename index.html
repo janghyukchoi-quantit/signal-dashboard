@@ -56,6 +56,10 @@ tbody td{padding:9px 11px;font-size:12px;}
 .st-MODERATE{background:rgba(234,179,8,.15);color:var(--ylw);}
 .st-LOW_RISK{background:rgba(6,182,212,.15);color:var(--cyn);}
 .st-STABLE{background:rgba(34,197,94,.15);color:var(--grn);}
+.st-VALIDATED{background:rgba(34,197,94,.15);color:var(--grn);}
+.st-MODERATE_RISK{background:rgba(234,179,8,.15);color:var(--ylw);}
+.st-WEAK_SIGNAL{background:rgba(148,163,184,.15);color:var(--tx2);}
+.st-NOT_WORKING{background:rgba(239,68,68,.15);color:var(--red);}
 .dp{display:none;background:var(--sf);border:1px solid var(--bd);border-radius:10px;padding:18px;margin:6px 0 14px;}
 .dp.open{display:block;}
 .dg{display:grid;grid-template-columns:3fr 2fr;gap:18px;}
@@ -329,19 +333,25 @@ async function renderUxPanel(market) {
       <div class="g-row"><span class="g-label">kurt (첨도)</span><span class="g-desc">양수=뾰족한 분포(극단값 많음), 음수=납작한 분포. kurt > 3이면 fat tail 주의.</span></div>
 
       <h4>🏷️ Status 판정</h4>
-      <p style="margin-bottom:6px"><strong>Opportunity / Flow 시그널</strong> (매수/보유 관점):</p>
+      <p style="margin-bottom:6px"><strong>Opportunity 시그널</strong> (매수/보유 관점):</p>
       <div class="status-row">
         <div class="status-item"><span class="st st-STABLE">STABLE</span> Pain &lt; 5%</div>
         <div class="status-item"><span class="st st-LOW_RISK">LOW_RISK</span> Pain 5~10%</div>
         <div class="status-item"><span class="st st-MODERATE">MODERATE</span> Pain 10~20%</div>
         <div class="status-item"><span class="st st-HIGH_RISK">HIGH_RISK</span> Pain &gt; 20%</div>
       </div>
-      <p style="margin-top:10px;margin-bottom:6px"><strong>Risk 시그널</strong> (매도/회피 관점) — 해석이 반대입니다:</p>
-      <p style="color:var(--tx);font-size:11px;line-height:1.7">
-        Risk 시그널의 MAE/Pain은 <em>"시그널을 무시하고 보유했을 때"</em>의 낙폭입니다.<br>
-        따라서 Pain Ratio가 <strong>높을수록 시그널이 잘 작동</strong>한 것입니다 (실제로 크게 빠졌으므로).<br>
-        카드에서 <span style="color:var(--red)">빨간 배경 안내문</span>이 표시되고, MAE/Pain 색상이 반전됩니다 (초록=큰 낙폭=작동).
-      </p>
+      <p style="margin-top:10px;margin-bottom:6px"><strong>Risk 시그널</strong> (매도/회피 관점 — 해석 반대):</p>
+      <div class="status-row">
+        <div class="status-item"><span class="st st-VALIDATED">VALIDATED</span> Pain &gt; 20% → 시그널 강하게 작동</div>
+        <div class="status-item"><span class="st st-MODERATE_RISK">MODERATE_RISK</span> Pain 10~20%</div>
+      </div>
+      <div class="status-row">
+        <div class="status-item"><span class="st st-WEAK_SIGNAL">WEAK_SIGNAL</span> Pain 5~10% → 약하게 작동</div>
+        <div class="status-item"><span class="st st-NOT_WORKING">NOT_WORKING</span> Pain &lt; 5% → 리스크 감지 실패</div>
+      </div>
+      <p style="margin-top:8px;font-size:11px">Risk 시그널의 MAE/Pain은 <em>"시그널을 무시하고 보유했을 때"</em>의 낙폭.<br>
+        Pain이 높을수록 시그널이 위험을 제대로 포착한 것. 카드에서 색상이 반전됩니다.</p>
+      <p style="margin-top:6px;font-size:11px"><strong>Flow 시그널</strong>은 방향 무관이라 MAE/MFE 분석 대상에서 제외됩니다.</p>
 
       <h4>⚙️ 컨트롤</h4>
       <div class="g-row"><span class="g-label">보유기간 드롭다운</span><span class="g-desc">선택한 HP에 따라 모든 지표가 재계산됨. 1D~20D.</span></div>
@@ -350,7 +360,7 @@ async function renderUxPanel(market) {
       <h4>⚠️ 해석 시 주의</h4>
       <p>• <strong>Opportunity 시그널</strong>: MAE가 큼 = 매수 후 낙폭 위험 → UX 경고 필요.<br>
       • <strong>Risk 시그널</strong>: MAE가 큼 = 시그널이 위험을 제대로 포착 → 시그널 검증. 카드에 반전 색상 적용됨.<br>
-      • <strong>Flow 시그널</strong>: 방향 무관, 움직임 크기가 핵심. MAE/MFE 모두 절대값으로 해석.<br>
+      • <strong>Flow 시그널</strong>: 방향 무관이므로 UX Guide에서 제외. OOS 성과 탭에서 |AR| 기준으로 확인.<br>
       • Raw 기준 = 사용자가 <strong>실제 체감하는 낙폭/수익</strong>. UX 경고 문구의 주 입력값.<br>
       • AR 기준 = 시장 효과를 제거한 <strong>시그널 고유의 리스크</strong>. 참고용으로 병기.<br>
       • N이 작은 시그널(특히 CR, FN 일부)은 분포 통계의 신뢰도가 낮음.</p>
