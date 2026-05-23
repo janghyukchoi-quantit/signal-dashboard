@@ -1,7 +1,7 @@
 {
   "market": "KR",
-  "generated_at": "2026-05-22 22:02",
-  "updated_at_kr": "2026-05-23 07:02 KST",
+  "generated_at": "2026-05-23 22:02",
+  "updated_at_kr": "2026-05-24 07:02 KST",
   "main_hp": 10,
   "holding_periods": [
     1,
@@ -7013,7 +7013,7 @@
       "n_total": 1703,
       "event_period": {
         "start": "2023-02-27",
-        "end": "2026-05-21"
+        "end": "2026-05-22"
       },
       "by_hp": {
         "1": {
